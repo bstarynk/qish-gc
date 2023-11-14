@@ -35,7 +35,7 @@
 
 #include "qish.h"
 
-
+const int qish_nil[2];
 
 struct qishgc_birth_st qishgc_birth;
 volatile int qish_need_full_gc;

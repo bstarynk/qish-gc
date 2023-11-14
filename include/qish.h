@@ -72,7 +72,7 @@ extern "C"
     /*threshold for full collection, eg 24Mb */ ;
 
 
-  extern const int qish_nil[];	// this is such that &qish_nil == 0 for BEGIN_SIMPLE_FRAME
+  extern const int qish_nil[];	// this is a special marker
 
 // minimal address
 #define QISH_MIN_ADDR     ((qish_uaddr_t)QISH_PAGESIZE)
@@ -359,30 +359,35 @@ extern "C"
 /* the first word of an object should be non-zero (except for fowarded
    pointers) */
 
-#define QISHGC_FORWARD(Pptr) do {					\
-  void **_qipptr = *(void ***) (Pptr);					\
-  if (*_qipptr == 0) {							\
-    /* already forwarded */						\
-    *(Pptr) = _qipptr[1];						\
-  } else {								\
-    void *_qiad = 0;							\
-    void *_qiend =  (void*)qishgc_old_cur;				\
-    _qiend = qish_gc_copy (&_qiad, _qiend, (const void *) _qipptr);	\
-    _qipptr[0] = 0;							\
-    _qipptr[1] = _qiad;							\
-    *(Pptr) = _qiad;							\
-    qishgc_old_cur = _qiend;						\
-  }									\
+#define QISHGC_FORWARD(Pptr) do {			\
+  void **_qipptr = *(void ***) (Pptr);			\
+  if (_qipptr != (void**)&qish_nil) {			\
+  if (*_qipptr == 0) {					\
+    /* already forwarded */				\
+    *(Pptr) = _qipptr[1];				\
+  } else {						\
+    void *_qiad = 0;					\
+    void *_qiend =  (void*)qishgc_old_cur;		\
+    _qiend = qish_gc_copy (&_qiad, _qiend,		\
+			   (const void *) _qipptr);	\
+    _qipptr[0] = 0;					\
+    _qipptr[1] = _qiad;					\
+    *(Pptr) = _qiad;					\
+    qishgc_old_cur = _qiend;				\
+  }							\
+ }							\
 }  while(0)
 
 
 #define QISHGC_MINOR_UPDATE(Ptr) do {		\
-  if (((qish_uaddr_t)(Ptr) & 3) == 0)		\
+  if (((qish_uaddr_t)(Ptr) & 3) == 0		\
+      && Ptr != &qish_nil)			\
        QISHGC_MINOR_PTR_UPDATE(Ptr);		\
 } while(0)
 
 #define QISH_FOLLOW_FORWARD(Ptr) do {		\
-  if (((qish_uaddr_t)(Ptr) & 3) == 0)		\
+  if (((qish_uaddr_t)(Ptr) & 3) == 0		\
+      && Ptr != &qish_nil)			\
        QISH_FOLLOW_FORWARD_PTR(Ptr);		\
 } while(0)
 
@@ -399,7 +404,8 @@ while ((qish_uaddr_t)(Ptr)>(qish_uaddr_t)QISH_MIN_ADDR	\
   /* qishgc minor ptr update */                 \
   QISH_FOLLOW_FORWARD_PTR(Ptr);			\
   _qip = (qish_uaddr_t)(Ptr);			\
-  if (_qip>=(qish_uaddr_t)qishgc_birth.bt_lo	\
+  if (_qip != (qish_uaddr_t) &qish_nil           \
+      &&_qip>=(qish_uaddr_t)qishgc_birth.bt_lo	\
       && _qip<(qish_uaddr_t)qishgc_birth.bt_hi)	\
     {QISHGC_FORWARD((void**)&(Ptr)); } 		\
  else if (QISH_IS_FIXED_PTR(_qip)) 		\

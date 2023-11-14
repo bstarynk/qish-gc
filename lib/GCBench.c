@@ -45,6 +45,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
+#include <string.h>
 #include <sys/time.h>
 #include <sys/times.h>
 
@@ -324,7 +325,7 @@ TimeConstruction (int depth)
       tempTree = 0;
     }
   tFinish = currentTime ();
-  printf ("\tTop down construction took %d msec\n",
+  printf ("\tTop down construction took %ld msec\n",
 	  elapsedTime (tFinish - tStart));
 
   tStart = currentTime ();
@@ -337,7 +338,7 @@ TimeConstruction (int depth)
       tempTree = 0;
     }
   tFinish = currentTime ();
-  printf ("\tBottom up construction took %d msec\n",
+  printf ("\tBottom up construction took %ld msec\n",
 	  elapsedTime (tFinish - tStart));
 #ifdef QISH
   EXIT_FRAME ();
@@ -396,7 +397,7 @@ qishmain ()
 	  " Holes"
 #endif
 	  "\n");
-  printf (" Live storage will peak at %d bytes.\n\n",
+  printf (" Live storage will peak at %ld bytes.\n\n",
 	  2 * sizeof (Node0) * TreeSize (kLongLivedTreeDepth) +
 	  sizeof (double) * kArraySize);
   printf (" Stretching memory with a binary tree of depth %d\n",
@@ -462,14 +463,14 @@ qishmain ()
   PrintDiagnostics ();
   times (&mytms);
   tick = sysconf (_SC_CLK_TCK);
-  printf ("Completed in %d msec\n", tElapsed);
+  printf ("Completed in %ld msec\n", tElapsed);
   printf (" CPU %.3f user + %.3f system = %.3f total time (sec)\n",
 	  (double) mytms.tms_utime / (double) tick,
 	  (double) mytms.tms_stime / (double) tick,
 	  ((double) mytms.tms_stime +
 	   (double) mytms.tms_utime) / (double) tick);
 #ifdef GC
-  printf ("Completed %d Boehm collections\n", GC_gc_no);
+  printf ("Completed %ld Boehm collections\n", GC_gc_no);
   printf ("Heap size is %d\n", GC_get_heap_size ());
 #endif
 #ifdef QISH

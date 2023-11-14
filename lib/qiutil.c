@@ -40,11 +40,6 @@
 
 #include "qish.h"
 
-#ifndef STRICT_C99
-/* we need to define the symbol qish_nil as having the adress 0 for
-   use in BEGIN_SIMPLE_FRAME... macros  */
-asm (".global qish_nil\n qish_nil = 0\n");
-#endif
 
 #define EMPTYSLOT  (void*)-1
 
