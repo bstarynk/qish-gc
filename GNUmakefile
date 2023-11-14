@@ -6,11 +6,12 @@ RM=/bin/rm -vf
 MV=/bin/mv
 CP=/bin/cp -v
 ED=/usr/bin/ed
+INDENT=/usr/bin/indent
 INSTALL=/usr/bin/install
 MKDIR=/usr/bin/mkdir -vp
 RELEASE=1.0
 
-.PHONY: all prog clean lib dist install test
+.PHONY: all indent prog clean lib dist install test
 all: lib prog
 
 lib:
@@ -20,8 +21,11 @@ clean:
 	$(MAKE) -C lib clean
 	$(MAKE) -C doc clean
 #	$(MAKE) -C ruko clean
-	$(RM) core *~ .*.prcs_aux
+	$(RM) core *~ */*~
 
+indent:
+	$(INDENT) include/qish.h
+	for f in $(wildcard lib/*.[ch]) ; do  $(INDENT) $$f ; done
 prog:
 #	$(MAKE) -C beth prog
 

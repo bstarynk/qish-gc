@@ -22,11 +22,12 @@
  * Boston, MA 02111-1307, USA.
  */
 
-#define QISH_GITID "b65bbc844409+"
-#define QISH_TIMESTAMP "YYYYYY"
+#define QISH_GITID "5dc75189ba36+"
+#define QISH_TIMESTAMP "now"
 
 #ifdef __cplusplus
-extern "C" {
+extern "C"
+{
 #endif
 
 
@@ -84,7 +85,7 @@ extern "C" {
 #define QISH_LIKELY(A) (A)
 #define QISH_UNLIKELY(A) (A)
 #endif
-  
+
   extern int qish_debug;
 #ifndef NDEBUG
 #define qish_dbgprintf(Fmt, ...) do { if (qish_debug) {	\
@@ -176,8 +177,8 @@ extern "C" {
 #endif				/*no QISH_ROUTINE */
 
   // C++ support is always done thru a routine pointer (even with QISH_ROUTINE)
-  extern void (*qishcpp_minor_p)(void);
-  extern void (*qishcpp_full_p)(void);
+  extern void (*qishcpp_minor_p) (void);
+  extern void (*qishcpp_full_p) (void);
 #define qishcpp_minor() do{if(qishcpp_minor_p) (*qishcpp_minor_p)(); } while(0)
 #define qishcpp_full() do{if(qishcpp_full_p) (*qishcpp_full_p)(); } while(0)
 
@@ -186,7 +187,8 @@ extern "C" {
 
 
 
-  struct qishgc_safepointdescr_st {
+  struct qishgc_safepointdescr_st
+  {
     unsigned short gcd_nbparam;
     unsigned short gcd_nblocal;
     unsigned long gcd_rank;
@@ -194,7 +196,8 @@ extern "C" {
     const char *gcd_cname;
   };
 
-  struct qishgc_framedescr_st {
+  struct qishgc_framedescr_st
+  {
     const struct qishgc_safepointdescr_st *gcf_point;
     volatile struct qishgc_framedescr_st *gcf_prev;
     void **gcf_args;
@@ -202,7 +205,8 @@ extern "C" {
   };
 
 /* header before fixed address objects */
-  struct qishfixedheader_st {
+  struct qishfixedheader_st
+  {
     unsigned short kfx_magic;	/* magic number */
     unsigned char kfx_sizix;	/* size index */
     unsigned char kfx_mark;	/* GC mark */
@@ -210,13 +214,14 @@ extern "C" {
     struct qishfixedheader_st *kfx_phyprev;	/* link to *physically* previous object header (by address) */
     struct qishfixedheader_st *kfx_next;	/* link to logically next object (of same size) */
     char kfx_data[FLEXIBLE_ARRAY_DIM]
-      __attribute__ ((__aligned__ (2 * sizeof (double))));
+      __attribute__((__aligned__ (2 * sizeof (double))));
   };
 
 
 
 
-  struct qishgc_birth_st {	/* in multithreaded each thread has its own such structure */
+  struct qishgc_birth_st
+  {				/* in multithreaded each thread has its own such structure */
 #define QISHGC_BIRTH_MAGIC 0xc26fbf
     int bt_magic;
     /* the birth region has a low and a high pointer */
@@ -250,7 +255,8 @@ extern "C" {
 
   extern volatile int qish_need_gc;
 
-  enum { QISH_GC_MINOR = 0, QISH_GC_FULL };
+  enum
+  { QISH_GC_MINOR = 0, QISH_GC_FULL };
 
   /// call the garbage collector; first argument is new required
   /// birthsize, eg wanted size; second argument is a boolean flag to
@@ -260,7 +266,8 @@ extern "C" {
   /// preforward some application pointers from a set of old pointers
   /// to be forwarded into a set of new pointers; costly, since
   /// require a full garbage collection; 
-  void qish_preforward_garbagecollect(int nbforw, void*oldforw[], void*newforw[]);
+  void qish_preforward_garbagecollect (int nbforw, void *oldforw[],
+				       void *newforw[]);
 
 // test if a pointer is moving (outside of GC routines!)
 #define QISH_IS_MOVING_PTR(P) ((((qish_uaddr_t)P)&3)==0 &&		\
@@ -272,8 +279,8 @@ extern "C" {
   ( ((void*)(P)>=qishgc_fixed_lo && (void*)(P)<=qishgc_fixed_hi)))
 
 #ifndef NO_QISH_INLINE
-  static inline void
-    qish_write_notify (void *ob) {
+  static inline void qish_write_notify (void *ob)
+  {
     if ((qish_uaddr_t) ob < (qish_uaddr_t) qishgc_old_lo
 	|| (qish_uaddr_t) ob > (qish_uaddr_t) qishgc_old_hi
 	|| ob == qishgc_birth.bt_storeptr[1]
@@ -281,8 +288,8 @@ extern "C" {
 	|| ob == qishgc_birth.bt_storeptr[3])
       return;
     *(qishgc_birth.bt_storeptr--) = ob;
-    if (QISH_UNLIKELY(((void **) qishgc_birth.bt_storeptr - 4 <=
-		       (void **) qishgc_birth.bt_cur)))
+    if (QISH_UNLIKELY (((void **) qishgc_birth.bt_storeptr - 4 <=
+			(void **) qishgc_birth.bt_cur)))
       qish_garbagecollect (QISH_PAGESIZE, 0);
   }				// end of qish_write_notify
 #endif				/*NO_QISH_INLINE */
@@ -304,7 +311,8 @@ extern "C" {
 
 #ifndef NO_QISH_INLINE
   /* tagged int (i.e. unaligned pointers) */ static inline int
-    qish_is_tagged_int (const void *ptr) {
+    qish_is_tagged_int (const void *ptr)
+  {
     return (((qish_uaddr_t) ptr) & 1);
   }				// end of qish_is_tagged_int
 #endif /*NO_QISH_INLINE */
@@ -321,25 +329,25 @@ extern "C" {
 
 
 #ifndef NO_QISH_INLINE
-  static inline int
-    qish_tagged_to_int (void *ptr) {
+  static inline int qish_tagged_to_int (void *ptr)
+  {
     if (qish_is_tagged_int (ptr))
       return QISH_TAGGED2INT (ptr);
     else
       return 0;
   }				// end of qish_tagged_to_int
 
-  static inline void *qish_int_to_tagged (int i) {
-    return QISH_LONG2TAGGED ((long)i);
+  static inline void *qish_int_to_tagged (int i)
+  {
+    return QISH_LONG2TAGGED ((long) i);
   }				// end of qish_int_to_tagged
 #endif
 
   extern void qish_panic_at (int err, const char *fil, int lin,
 			     const char *fct, const char *fmt, ...)
-    __attribute__ ((noreturn, format (printf, 5, 6)));
+    __attribute__((noreturn, format (printf, 5, 6)));
 
-    extern void qish_abort(void)
-       __attribute__ ((noreturn));
+  extern void qish_abort (void) __attribute__((noreturn));
 
 #define qish_panic(Fmt,...) \
   qish_panic_at(0, __FILE__, __LINE__, __FUNCTION__, Fmt, ##__VA_ARGS__)
@@ -490,7 +498,8 @@ while ((qish_uaddr_t)(Ptr)>(qish_uaddr_t)QISH_MIN_ADDR	\
   QISH_BEGIN_SIMPLE_FRAME(Nparam,Param1,sizeof(_locals_)/sizeof(void*),_locals_)
 #define BEGIN_LOCAL_FRAME QISH_BEGIN_LOCAL_FRAME
 
-  struct qish_excframe_st {
+  struct qish_excframe_st
+  {
     unsigned spareheader;
     void *obj;
     volatile struct qishgc_framedescr_st *savedfram;
@@ -530,8 +539,8 @@ while ((qish_uaddr_t)(Ptr)>(qish_uaddr_t)QISH_MIN_ADDR	\
 
   void qishgc_fullmark (void *);
   void qishgc_minormark (void *);
-  void qishgc_minormarkscan(void*);
-  void qishgc_fullmarkscan(void*);
+  void qishgc_minormarkscan (void *);
+  void qishgc_fullmarkscan (void *);
 
 /* the global roots - there should be a small number of them,
    typically less than the number of pointers in a rather shallow call
@@ -540,7 +549,8 @@ while ((qish_uaddr_t)(Ptr)>(qish_uaddr_t)QISH_MIN_ADDR	\
   extern volatile void *qish_roots[QISH_NB_ROOTS];
 
 #define QISH_MAX_MODULE 8192
-  extern struct qishmodule_st {
+  extern struct qishmodule_st
+  {
     char km_name[100];		// module basename
     void *km_handle;		// handle from dlopen
     void *km_constant;		// garbage-collected constant
@@ -585,8 +595,8 @@ while ((qish_uaddr_t)(Ptr)>(qish_uaddr_t)QISH_MIN_ADDR	\
 } while(0)
 
 #ifndef NO_QISH_INLINE
-  static inline void
-    qish_change_module_constant (int rk, void *val) {
+  static inline void qish_change_module_constant (int rk, void *val)
+  {
     assert (rk >= 0 && rk < QISH_MAX_MODULE);
     // even constant changed to new objects need notification!
     qish_moduletab[rk].km_constant = val;
@@ -594,7 +604,8 @@ while ((qish_uaddr_t)(Ptr)>(qish_uaddr_t)QISH_MIN_ADDR	\
       qishgc_birth.bt_changedconstrank = rk + 1;
   }				// end of qish_changeconstant
 
-  static inline void *qish_module_constant (int rk) {
+  static inline void *qish_module_constant (int rk)
+  {
     assert (rk >= 0 && rk < QISH_MAX_MODULE);
     return qish_moduletab[rk].km_constant;
   }
@@ -602,13 +613,15 @@ while ((qish_uaddr_t)(Ptr)>(qish_uaddr_t)QISH_MIN_ADDR	\
 
 
 // allocate an object in the birth region without specific alignement constraints
-  static inline void *qish_allocate (int siz) {
+  static inline void *qish_allocate (int siz)
+  {
     volatile void *res = 0;
     assert (siz >= (int) sizeof (void *));
-    if (siz & (sizeof (void *) - 1)) {
-      siz |= sizeof (void *) - 1;
-      siz++;
-    };
+    if (siz & (sizeof (void *) - 1))
+      {
+	siz |= sizeof (void *) - 1;
+	siz++;
+      };
     if (qish_need_full_gc
 	|| (qish_uaddr_t) (((char *) qishgc_birth.bt_cur) + siz) >=
 	(qish_uaddr_t) (qishgc_birth.bt_storeptr - 2))
@@ -641,33 +654,38 @@ while ((qish_uaddr_t)(Ptr)>(qish_uaddr_t)QISH_MIN_ADDR	\
 } while(0)
 
 
-  static inline void
-    qish_reserve (int siz) {
-    if (QISH_UNLIKELY((qish_uaddr_t) (((char *) qishgc_birth.bt_cur) + siz) >=
-		      (qish_uaddr_t) (qishgc_birth.bt_storeptr - 2)))
+  static inline void qish_reserve (int siz)
+  {
+    if (QISH_UNLIKELY
+	((qish_uaddr_t) (((char *) qishgc_birth.bt_cur) + siz) >=
+	 (qish_uaddr_t) (qishgc_birth.bt_storeptr - 2)))
       qish_garbagecollect (siz + 4 * sizeof (double), 0);
   }				// end of qish_reserve
 
 // allocate an object in the birth region with an alignement (bigger than the machine word)
-  static inline void *qish_allocate_aligned (int siz, int align) {
+  static inline void *qish_allocate_aligned (int siz, int align)
+  {
     void *res = 0;
     qish_uaddr_t ad = 0;
     assert (siz >= (int) sizeof (void *));
     assert (align == sizeof (int) || align == 2 * sizeof (int)
 	    || align == 4 * sizeof (int) || align == 8 * sizeof (int)
 	    || align == 16 * sizeof (int) || align == 32 * sizeof (int));
-    if (siz & (align - 1)) {
-      siz |= align - 1;
-      siz++;
-    };
-    if (QISH_UNLIKELY((qish_uaddr_t) (((char *) qishgc_birth.bt_cur) + siz + 2 * align) >=
-		      (qish_uaddr_t) (qishgc_birth.bt_storeptr - 2)))
+    if (siz & (align - 1))
+      {
+	siz |= align - 1;
+	siz++;
+      };
+    if (QISH_UNLIKELY
+	((qish_uaddr_t) (((char *) qishgc_birth.bt_cur) + siz + 2 * align) >=
+	 (qish_uaddr_t) (qishgc_birth.bt_storeptr - 2)))
       qish_garbagecollect (siz + 2 * align + 4 * sizeof (double), 0);
     ad = (qish_uaddr_t) qishgc_birth.bt_cur;
-    if (ad & (align - 1)) {
-      ad |= align - 1;
-      ad++;
-    };
+    if (ad & (align - 1))
+      {
+	ad |= align - 1;
+	ad++;
+      };
     res = (void *) ad;
     qishgc_birth.bt_cur = (void *) (ad + siz);
     return res;
@@ -699,7 +717,7 @@ while ((qish_uaddr_t)(Ptr)>(qish_uaddr_t)QISH_MIN_ADDR	\
   void *qish_fixed_exec_alloc (size_t sz, void (*destr) (void *));
 
   // forget a fixed object ie clear it and clear any pointers to it
-  void qish_fixed_forget(void* ptr);
+  void qish_fixed_forget (void *ptr);
 
 // compute an hashcode of a string; if len<0 take len=strlen(str)
   unsigned qish_strhash (const char *str, int len);
@@ -732,8 +750,8 @@ while ((qish_uaddr_t)(Ptr)>(qish_uaddr_t)QISH_MIN_ADDR	\
 
 #ifndef NO_QISH_INLINE
 // output such a char on a file
-  static inline void
-    qish_putxmlc (int c, FILE * f) {
+  static inline void qish_putxmlc (int c, FILE * f)
+  {
     char buf[12];
     buf[0] = 0;
     qish_encodexmlchar (c, buf);
@@ -759,52 +777,62 @@ while ((qish_uaddr_t)(Ptr)>(qish_uaddr_t)QISH_MIN_ADDR	\
 
 #ifdef __cplusplus
 //// additional C++ support
-class QishCpp_StackRoots_Any {
-  static QishCpp_StackRoots_Any* qishr_top_;
-  QishCpp_StackRoots_Any* _qishr_prev;
+class QishCpp_StackRoots_Any
+{
+  static QishCpp_StackRoots_Any *qishr_top_;
+  QishCpp_StackRoots_Any *_qishr_prev;
   const int _qishr_nbroots;
   const int _qishr_nbextra;
-  void*volatile* _qishr_extra;
-  volatile void* _qishr_tabroots[];
-  static void qishr_minor();
-  static void qishr_full();
-  class Qishr_installer_cl {
+  void *volatile *_qishr_extra;
+  volatile void *_qishr_tabroots[];
+  static void qishr_minor ();
+  static void qishr_full ();
+  class Qishr_installer_cl
+  {
   public:
-    Qishr_installer_cl();
+    Qishr_installer_cl ();
   };
   static Qishr_installer_cl _qishr_init_;
- protected:
-  QishCpp_StackRoots_Any(int nbroot, int nbextra, void**extra) :
-    _qishr_prev(qishr_top_), _qishr_nbroots(nbroot), 
-    _qishr_nbextra(nbextra), _qishr_extra(extra) {
+protected:
+    QishCpp_StackRoots_Any (int nbroot, int nbextra,
+			    void **extra):_qishr_prev (qishr_top_),
+    _qishr_nbroots (nbroot), _qishr_nbextra (nbextra), _qishr_extra (extra)
+  {
     qishr_top_ = this;
-    for (int i=0; i<_qishr_nbroots; i++) _qishr_tabroots[i]=0;
+    for (int i = 0; i < _qishr_nbroots; i++)
+      _qishr_tabroots[i] = 0;
   };
-  QishCpp_StackRoots_Any(int nbextra, void**extra, size_t sz) :
-    _qishr_prev(qishr_top_), 
-    _qishr_nbroots((sz-sizeof(QishCpp_StackRoots_Any))/sizeof(void*)), 
-    _qishr_nbextra(nbextra), _qishr_extra(extra) {
+  QishCpp_StackRoots_Any (int nbextra, void **extra,
+			  size_t sz):_qishr_prev (qishr_top_),
+    _qishr_nbroots ((sz - sizeof (QishCpp_StackRoots_Any)) / sizeof (void *)),
+    _qishr_nbextra (nbextra), _qishr_extra (extra)
+  {
     qishr_top_ = this;
-    for (int i=0; i<_qishr_nbroots; i++) _qishr_tabroots[i]=0;
+    for (int i = 0; i < _qishr_nbroots; i++)
+      _qishr_tabroots[i] = 0;
   };
-  ~QishCpp_StackRoots_Any() {
-    assert(qishr_top_ == this);
+  ~QishCpp_StackRoots_Any ()
+  {
+    assert (qishr_top_ == this);
     qishr_top_ = _qishr_prev;
-    for (int i=0; i<_qishr_nbroots; i++) _qishr_tabroots[i]=0;
+    for (int i = 0; i < _qishr_nbroots; i++)
+      _qishr_tabroots[i] = 0;
   };
-  void qishstack_minor_scan() {
-    for (int i=0; i<_qishr_nbroots; i++)
-      QISHGC_MINOR_UPDATE(_qishr_tabroots[i]);
-    if (_qishr_extra) 
-      for (int i=0; i<_qishr_nbextra; i++)
-	QISHGC_MINOR_UPDATE(_qishr_extra[i]);
+  void qishstack_minor_scan ()
+  {
+    for (int i = 0; i < _qishr_nbroots; i++)
+      QISHGC_MINOR_UPDATE (_qishr_tabroots[i]);
+    if (_qishr_extra)
+      for (int i = 0; i < _qishr_nbextra; i++)
+	QISHGC_MINOR_UPDATE (_qishr_extra[i]);
   };
-  void qishstack_full_scan() {
-    for (int i=0; i<_qishr_nbroots; i++)
-      QISHGC_FULL_UPDATE(_qishr_tabroots[i]);
-    if (_qishr_extra) 
-      for (int i=0; i<_qishr_nbextra; i++)
-	QISHGC_FULL_UPDATE(_qishr_extra[i]);
+  void qishstack_full_scan ()
+  {
+    for (int i = 0; i < _qishr_nbroots; i++)
+      QISHGC_FULL_UPDATE (_qishr_tabroots[i]);
+    if (_qishr_extra)
+      for (int i = 0; i < _qishr_nbextra; i++)
+	QISHGC_FULL_UPDATE (_qishr_extra[i]);
   };
 };				/* end class QishCpp_StackRoots_Any */
 
@@ -846,38 +874,45 @@ class QishCpp_StackRoots_Any {
 } _locals_;
 
 class QishCpp_BoxedHash;	/* defined in qicpp.cpp */
-class QishCpp_ABox {
-  QishCpp_ABox*_qishnext;
-  QishCpp_ABox*_qishprev;
-  static QishCpp_ABox*qishlast_;
+class QishCpp_ABox
+{
+  QishCpp_ABox *_qishnext;
+  QishCpp_ABox *_qishprev;
+  static QishCpp_ABox *qishlast_;
   friend class QishCpp_BoxedHash;
-  static QishCpp_BoxedHash*qishboxhash_;
+  static QishCpp_BoxedHash *qishboxhash_;
   static unsigned long qishnbbox_;
- protected:
-  void* _qishptrtab[];
- private:
-  virtual void qishscan_minor()=0;
-  virtual void qishscan_full()=0;
-  virtual int qishscan_nbptr() const=0;
+protected:
+  void *_qishptrtab[];
+private:
+    virtual void qishscan_minor () = 0;
+  virtual void qishscan_full () = 0;
+  virtual int qishscan_nbptr () const = 0;
   friend class QishCpp_StackRoots_Any;
-  void qishremove();
- public:
-  void qishtouch();		/* to be called when any pointer is updated */
- protected:
-  QishCpp_ABox() {
+  void qishremove ();
+public:
+  void qishtouch ();		/* to be called when any pointer is updated */
+protected:
+    QishCpp_ABox ()
+  {
     qishnbbox_++;
-    if (qishlast_) {
-      qishlast_->_qishnext = this;
-      this->_qishprev = qishlast_;
-    };
+    if (qishlast_)
+      {
+	qishlast_->_qishnext = this;
+	this->_qishprev = qishlast_;
+      };
     qishlast_ = this;
   };
-  virtual ~QishCpp_ABox() {
-    qishremove();
+  virtual ~ QishCpp_ABox ()
+  {
+    qishremove ();
     qishnbbox_--;
-    if (_qishnext) _qishnext->_qishprev = _qishprev;
-    if (_qishprev) _qishprev->_qishnext = _qishnext;
-    if (this==qishlast_) qishlast_ = _qishprev;
+    if (_qishnext)
+      _qishnext->_qishprev = _qishprev;
+    if (_qishprev)
+      _qishprev->_qishnext = _qishnext;
+    if (this == qishlast_)
+      qishlast_ = _qishprev;
     _qishprev = _qishnext = 0;
   };
 };				/* end of class QishCpp_ABox */
@@ -886,25 +921,32 @@ class QishCpp_ABox {
 /// utility class to box pointers inside C++ classes; be careful to
 /// call qishtouch() when any pointer is changed
 
-template<class PtrStruct> class QishCpp_Box
-: public QishCpp_ABox, public PtrStruct {
-  virtual void qishscan_minor() {
-    for (unsigned i=0; i<sizeof(PtrStruct)/sizeof(void*); i++)
-      QISHGC_MINOR_UPDATE(_qishptrtab[i]);
+template < class PtrStruct > class QishCpp_Box:public QishCpp_ABox,
+  public PtrStruct
+{
+  virtual void qishscan_minor ()
+  {
+    for (unsigned i = 0; i < sizeof (PtrStruct) / sizeof (void *); i++)
+      QISHGC_MINOR_UPDATE (_qishptrtab[i]);
   };
-  virtual void qishscan_full() {
-    for (unsigned i=0; i<sizeof(PtrStruct)/sizeof(void*); i++)
-      QISHGC_FULL_UPDATE(_qishptrtab[i]);
+  virtual void qishscan_full ()
+  {
+    for (unsigned i = 0; i < sizeof (PtrStruct) / sizeof (void *); i++)
+      QISHGC_FULL_UPDATE (_qishptrtab[i]);
   };
-  virtual int qishscan_nbptr() const 
-  { return sizeof(PtrStruct)/sizeof(void*); }
- public:
-  QishCpp_Box() : QishCpp_ABox(), PtrStruct() {
-    memset(_qishptrtab, 0, sizeof(PtrStruct));
-    qishtouch();
+  virtual int qishscan_nbptr () const
+  {
+    return sizeof (PtrStruct) / sizeof (void *);
+  }
+public:
+    QishCpp_Box ():QishCpp_ABox (), PtrStruct ()
+  {
+    memset (_qishptrtab, 0, sizeof (PtrStruct));
+    qishtouch ();
   };
-  virtual ~QishCpp_Box() {
-    memset(_qishptrtab, 0, sizeof(PtrStruct));
+  virtual ~ QishCpp_Box ()
+  {
+    memset (_qishptrtab, 0, sizeof (PtrStruct));
   };
 };				/* end of template QishCpp_Box */
 

@@ -48,10 +48,12 @@ asm (".global qish_nil\n qish_nil = 0\n");
 
 #define EMPTYSLOT  (void*)-1
 
-struct paramhtab_st {
+struct paramhtab_st
+{
   unsigned tablen;
   int nbparam;
-  struct {
+  struct
+  {
     char *key;			/* strdup-ed key */
     char *val;			/* strdup-ed value */
   } tab[FLEXIBLE_ARRAY_DIM];
@@ -71,48 +73,62 @@ addparam (char *mkey, char *mval)
   int ln = 0;
   h = qish_strhash (mkey, -1) % qish_paramhtab->tablen;
   ln = qish_paramhtab->tablen;
-  for (i = h; i < ln; i++) {
-    char *curkey = qish_paramhtab->tab[i].key;
-    if (!curkey) {
-      if (pos < 0)
-	pos = i;
-      incr = 1;
-      break;
-    } else if (curkey == EMPTYSLOT) {
-      if (pos < 0)
-	pos = i;
-      incr = 1;
-    } else if (curkey[0] == mkey[0] && !strcmp (curkey, mkey)) {
-      if (qish_paramhtab->tab[i].val) {
-	free (qish_paramhtab->tab[i].val);
-	qish_paramhtab->tab[i].val = 0;
-      }
-      pos = i;
-      break;
+  for (i = h; i < ln; i++)
+    {
+      char *curkey = qish_paramhtab->tab[i].key;
+      if (!curkey)
+	{
+	  if (pos < 0)
+	    pos = i;
+	  incr = 1;
+	  break;
+	}
+      else if (curkey == EMPTYSLOT)
+	{
+	  if (pos < 0)
+	    pos = i;
+	  incr = 1;
+	}
+      else if (curkey[0] == mkey[0] && !strcmp (curkey, mkey))
+	{
+	  if (qish_paramhtab->tab[i].val)
+	    {
+	      free (qish_paramhtab->tab[i].val);
+	      qish_paramhtab->tab[i].val = 0;
+	    }
+	  pos = i;
+	  break;
+	}
     }
-  }
   if (pos >= 0)
     goto add_at_pos;
-  for (i = 0; i < (int) h; i++) {
-    char *curkey = qish_paramhtab->tab[i].key;
-    if (!curkey) {
-      if (pos < 0)
-	pos = i;
-      incr = 1;
-      break;
-    } else if (curkey == EMPTYSLOT) {
-      if (pos < 0)
-	pos = i;
-      incr = 1;
-    } else if (curkey[0] == mkey[0] && !strcmp (curkey, mkey)) {
-      if (qish_paramhtab->tab[i].val) {
-	free (qish_paramhtab->tab[i].val);
-	qish_paramhtab->tab[i].val = 0;
-      }
-      pos = i;
-      break;
+  for (i = 0; i < (int) h; i++)
+    {
+      char *curkey = qish_paramhtab->tab[i].key;
+      if (!curkey)
+	{
+	  if (pos < 0)
+	    pos = i;
+	  incr = 1;
+	  break;
+	}
+      else if (curkey == EMPTYSLOT)
+	{
+	  if (pos < 0)
+	    pos = i;
+	  incr = 1;
+	}
+      else if (curkey[0] == mkey[0] && !strcmp (curkey, mkey))
+	{
+	  if (qish_paramhtab->tab[i].val)
+	    {
+	      free (qish_paramhtab->tab[i].val);
+	      qish_paramhtab->tab[i].val = 0;
+	    }
+	  pos = i;
+	  break;
+	}
     }
-  }
   assert (pos >= 0);		/* otherwise table was full */
 add_at_pos:
   qish_paramhtab->tab[pos].key = mkey;
@@ -136,26 +152,28 @@ qish_put_parameter (const char *param, const char *val)
     qish_epanic ("cannot duplicate param val %s", val);
   if (!qish_paramhtab
       || (int) (4 * qish_paramhtab->nbparam) >=
-      (int) (3 * qish_paramhtab->tablen)) {
-    int newsiz = 0;
-    int i = 0;
-    oldtab = qish_paramhtab;
-    newsiz =
-      qish_paramhtab ? qish_prime_after (9 * qish_paramhtab->nbparam / 8 +
-					 50) : 31;
-    qish_paramhtab = calloc (1, sizeof (*qish_paramhtab)
-			     + newsiz * sizeof (qish_paramhtab->tab[0]));
-    if (!qish_paramhtab)
-      qish_epanic ("no memory for %d params", newsiz);
-    qish_paramhtab->tablen = newsiz;
-    qish_paramhtab->nbparam = 0;
-    if (oldtab)
-      for (i = 0; i < (int) oldtab->tablen; i++) {
-	char *curkey = oldtab->tab[i].key;
-	if (curkey && curkey != EMPTYSLOT)
-	  addparam (curkey, oldtab->tab[i].val);
-      }
-  }
+      (int) (3 * qish_paramhtab->tablen))
+    {
+      int newsiz = 0;
+      int i = 0;
+      oldtab = qish_paramhtab;
+      newsiz =
+	qish_paramhtab ? qish_prime_after (9 * qish_paramhtab->nbparam / 8 +
+					   50) : 31;
+      qish_paramhtab = calloc (1, sizeof (*qish_paramhtab)
+			       + newsiz * sizeof (qish_paramhtab->tab[0]));
+      if (!qish_paramhtab)
+	qish_epanic ("no memory for %d params", newsiz);
+      qish_paramhtab->tablen = newsiz;
+      qish_paramhtab->nbparam = 0;
+      if (oldtab)
+	for (i = 0; i < (int) oldtab->tablen; i++)
+	  {
+	    char *curkey = oldtab->tab[i].key;
+	    if (curkey && curkey != EMPTYSLOT)
+	      addparam (curkey, oldtab->tab[i].val);
+	  }
+    }
   addparam (lparam, lval);
 }				// end of qish_put_parameter 
 
@@ -171,41 +189,47 @@ qish_remove_parameter (const char *param)
   assert (param && param[0]);
   h = qish_strhash (param, -1) % qish_paramhtab->tablen;
   ln = qish_paramhtab->tablen;
-  for (i = h; i < ln; i++) {
-    char *curkey = qish_paramhtab->tab[i].key;
-    if (!curkey)
-      return;
-    else if (curkey == EMPTYSLOT)
-      continue;
-    else if (curkey[0] == param[0] && !strcmp (curkey, param)) {
-      if (qish_paramhtab->tab[i].val) {
-	free (qish_paramhtab->tab[i].val);
-	free (qish_paramhtab->tab[i].key);
-	qish_paramhtab->tab[i].val = 0;
-	qish_paramhtab->tab[i].key = EMPTYSLOT;
-	qish_paramhtab->nbparam--;
+  for (i = h; i < ln; i++)
+    {
+      char *curkey = qish_paramhtab->tab[i].key;
+      if (!curkey)
 	return;
-      }
-      break;
+      else if (curkey == EMPTYSLOT)
+	continue;
+      else if (curkey[0] == param[0] && !strcmp (curkey, param))
+	{
+	  if (qish_paramhtab->tab[i].val)
+	    {
+	      free (qish_paramhtab->tab[i].val);
+	      free (qish_paramhtab->tab[i].key);
+	      qish_paramhtab->tab[i].val = 0;
+	      qish_paramhtab->tab[i].key = EMPTYSLOT;
+	      qish_paramhtab->nbparam--;
+	      return;
+	    }
+	  break;
+	}
     }
-  }
-  for (i = 0; i < (int) h; i++) {
-    char *curkey = qish_paramhtab->tab[i].key;
-    if (!curkey)
-      return;
-    else if (curkey == EMPTYSLOT)
-      continue;
-    else if (curkey[0] == param[0] && !strcmp (curkey, param)) {
-      if (qish_paramhtab->tab[i].val) {
-	free (qish_paramhtab->tab[i].val);
-	free (qish_paramhtab->tab[i].key);
-	qish_paramhtab->tab[i].val = 0;
-	qish_paramhtab->tab[i].key = EMPTYSLOT;
-	qish_paramhtab->nbparam--;
+  for (i = 0; i < (int) h; i++)
+    {
+      char *curkey = qish_paramhtab->tab[i].key;
+      if (!curkey)
 	return;
-      }
+      else if (curkey == EMPTYSLOT)
+	continue;
+      else if (curkey[0] == param[0] && !strcmp (curkey, param))
+	{
+	  if (qish_paramhtab->tab[i].val)
+	    {
+	      free (qish_paramhtab->tab[i].val);
+	      free (qish_paramhtab->tab[i].key);
+	      qish_paramhtab->tab[i].val = 0;
+	      qish_paramhtab->tab[i].key = EMPTYSLOT;
+	      qish_paramhtab->nbparam--;
+	      return;
+	    }
+	}
     }
-  }
 }				// end of qish_remove_parameter
 
 char *
@@ -218,24 +242,26 @@ qish_parameter (const char *param)
     return 0;
   h = qish_strhash (param, -1) % qish_paramhtab->tablen;
   ln = qish_paramhtab->tablen;
-  for (i = h; i < ln; i++) {
-    char *curkey = qish_paramhtab->tab[i].key;
-    if (!curkey)
-      break;
-    if (curkey == EMPTYSLOT)
-      continue;
-    if (curkey[0] == param[0] && !strcmp (curkey, param))
-      return qish_paramhtab->tab[i].val;
-  };
-  for (i = 0; i < (int) h; i++) {
-    char *curkey = qish_paramhtab->tab[i].key;
-    if (!curkey)
-      break;
-    if (curkey == EMPTYSLOT)
-      continue;
-    if (curkey[0] == param[0] && !strcmp (curkey, param))
-      return qish_paramhtab->tab[i].val;
-  };
+  for (i = h; i < ln; i++)
+    {
+      char *curkey = qish_paramhtab->tab[i].key;
+      if (!curkey)
+	break;
+      if (curkey == EMPTYSLOT)
+	continue;
+      if (curkey[0] == param[0] && !strcmp (curkey, param))
+	return qish_paramhtab->tab[i].val;
+    };
+  for (i = 0; i < (int) h; i++)
+    {
+      char *curkey = qish_paramhtab->tab[i].key;
+      if (!curkey)
+	break;
+      if (curkey == EMPTYSLOT)
+	continue;
+      if (curkey[0] == param[0] && !strcmp (curkey, param))
+	return qish_paramhtab->tab[i].val;
+    };
   return 0;
 }				// end of qish_parameter
 
@@ -264,39 +290,40 @@ qish_parse_configfile (const char *configname)
   fil = fopen (configname, "r");
   if (!fil)
     qish_epanic ("cannot open config file %s", configname);
-  while (!feof (fil)) {
-    sym = val = 0;
-    memset (linbuf, 0, sizeof (linbuf));
-    lincnt++;
-    if (!fgets (linbuf, sizeof (linbuf), fil))
-      break;
-    linbuf[sizeof (linbuf) - 1] = 0;
-    if (linbuf[0] == '#')
-      continue;			/* skip comments */
-    for (ps = linbuf; *ps && isspace (*ps); ps++);
-    if (*ps == 0 || *ps == '\n')
-      continue;			/* skip blank lines */
-    sym = ps;
-    if (!isalpha (*sym))
-      qish_panic ("bad symbol %s in config file %s line %d",
-		  sym, configname, lincnt);
-    for (; *ps && (isalnum (*ps) || *ps == '_' || *ps == '.'); ps++);
-    for (; *ps && isspace (*ps); ps++)
-      *ps = 0;
-    if (*ps != '=')
-      qish_panic
-	("missing equal sign for symbol %s in config file %s line %d", sym,
-	 configname, lincnt);
-    *(ps++) = 0;
-    for (; *ps && isspace (*ps); ps++)
-      *ps = 0;
-    val = ps;
-    for (; *ps && isgraph (*ps); ps++);
-    if (isspace (*ps))
-      *ps = 0;
-    if (!qish_parameter (sym))
-      qish_put_parameter (sym, val);
-  };
+  while (!feof (fil))
+    {
+      sym = val = 0;
+      memset (linbuf, 0, sizeof (linbuf));
+      lincnt++;
+      if (!fgets (linbuf, sizeof (linbuf), fil))
+	break;
+      linbuf[sizeof (linbuf) - 1] = 0;
+      if (linbuf[0] == '#')
+	continue;		/* skip comments */
+      for (ps = linbuf; *ps && isspace (*ps); ps++);
+      if (*ps == 0 || *ps == '\n')
+	continue;		/* skip blank lines */
+      sym = ps;
+      if (!isalpha (*sym))
+	qish_panic ("bad symbol %s in config file %s line %d",
+		    sym, configname, lincnt);
+      for (; *ps && (isalnum (*ps) || *ps == '_' || *ps == '.'); ps++);
+      for (; *ps && isspace (*ps); ps++)
+	*ps = 0;
+      if (*ps != '=')
+	qish_panic
+	  ("missing equal sign for symbol %s in config file %s line %d", sym,
+	   configname, lincnt);
+      *(ps++) = 0;
+      for (; *ps && isspace (*ps); ps++)
+	*ps = 0;
+      val = ps;
+      for (; *ps && isgraph (*ps); ps++);
+      if (isspace (*ps))
+	*ps = 0;
+      if (!qish_parameter (sym))
+	qish_put_parameter (sym, val);
+    };
   fclose (fil);
 }				// end of qish_parse_configfile
 
@@ -318,13 +345,16 @@ void
 qish_postponed_dlclose (void)
 {
   int i = 0;
-  for (i = 0; i < NBPOSTPONEDLCLOSE; i++) {
-    if (postponed_hdl[i]) {
-      dlclose (postponed_hdl[i]);
-      postponed_hdl[i] = 0;
-    } else
-      break;
-  }
+  for (i = 0; i < NBPOSTPONEDLCLOSE; i++)
+    {
+      if (postponed_hdl[i])
+	{
+	  dlclose (postponed_hdl[i]);
+	  postponed_hdl[i] = 0;
+	}
+      else
+	break;
+    }
 }
 
 static void
@@ -332,12 +362,14 @@ postpone_dlclose (void *dlh)
 {
   int i = 0;
   assert (dlh != 0);
-  for (i = 0; i < NBPOSTPONEDLCLOSE; i++) {
-    if (!postponed_hdl[i]) {
-      postponed_hdl[i] = dlh;
-      return;
-    }
-  };
+  for (i = 0; i < NBPOSTPONEDLCLOSE; i++)
+    {
+      if (!postponed_hdl[i])
+	{
+	  postponed_hdl[i] = dlh;
+	  return;
+	}
+    };
   qish_panic ("postponed_hdl table full (%d elem)", NBPOSTPONEDLCLOSE);
 }				/* end of postpone_dlclose */
 
@@ -353,89 +385,105 @@ qish_load_module (char *modname, char *dirpath, int modrank)
   void *init = 0;
   memset (modpath, 0, sizeof (modpath));
   memset (dirname, 0, sizeof (dirname));
-  if (modrank < 0) {
-    // if a rank is not specified, find the original rank or a free one
-    int i, freerk = -1;
-    for (i = 0; i < QISH_MAX_MODULE; i++) {
-      if (qish_moduletab[i].km_name[0]
-	  && !strcmp (qish_moduletab[i].km_name, modname)) {
-	modrank = i;
-	break;
-      } else if (freerk < 0 && !qish_moduletab[i].km_handle
-		 && !qish_moduletab[i].km_name[0])
-	freerk = i;
+  if (modrank < 0)
+    {
+      // if a rank is not specified, find the original rank or a free one
+      int i, freerk = -1;
+      for (i = 0; i < QISH_MAX_MODULE; i++)
+	{
+	  if (qish_moduletab[i].km_name[0]
+	      && !strcmp (qish_moduletab[i].km_name, modname))
+	    {
+	      modrank = i;
+	      break;
+	    }
+	  else if (freerk < 0 && !qish_moduletab[i].km_handle
+		   && !qish_moduletab[i].km_name[0])
+	    freerk = i;
+	};
+      if (modrank < 0)
+	modrank = freerk;
     };
-    if (modrank < 0)
-      modrank = freerk;
-  };
   assert (modrank >= 0 && modrank < QISH_MAX_MODULE);
-  if (dirpath) {
-    char *colon = 0, *dir = dirpath;
-    for (dir = dirpath; (colon = strchr (dir, ':')) != 0; dir = colon + 1) {
-      memset (dirname, 0, sizeof (dirname));
-      strncpy (dirname, dir,
-	       ((colon - dir) >=
-		(int) sizeof (dirname) - 1) ? ((int) sizeof (dirname) - 1)
-	       : colon - dir - 1);
-      if (!dirname[0]) {
-	dirname[0] = '.';
-	dirname[1] = (char) 0;
-      };
-      snprintf (modpath, sizeof (modpath) - 1, "%s/%s_qi.so", dirname,
-		modname);
+  if (dirpath)
+    {
+      char *colon = 0, *dir = dirpath;
+      for (dir = dirpath; (colon = strchr (dir, ':')) != 0; dir = colon + 1)
+	{
+	  memset (dirname, 0, sizeof (dirname));
+	  strncpy (dirname, dir,
+		   ((colon - dir) >=
+		    (int) sizeof (dirname) - 1) ? ((int) sizeof (dirname) - 1)
+		   : colon - dir - 1);
+	  if (!dirname[0])
+	    {
+	      dirname[0] = '.';
+	      dirname[1] = (char) 0;
+	    };
+	  snprintf (modpath, sizeof (modpath) - 1, "%s/%s_qi.so", dirname,
+		    modname);
+	  if (!access (modpath, R_OK))
+	    goto found;
+	  snprintf (modpath, sizeof (modpath) - 1, "%s/%s_qj.so", dirname,
+		    modname);
+	  if (!access (modpath, R_OK))
+	    goto found;
+	  snprintf (modpath, sizeof (modpath) - 1, "%s/%s_qk.so", dirname,
+		    modname);
+	  if (!access (modpath, R_OK))
+	    goto found;
+	};
+      if (dir && dir[0])
+	{
+	  snprintf (modpath, sizeof (modpath) - 1, "%s/%s_qi.so", dir,
+		    modname);
+	  if (!access (modpath, R_OK))
+	    goto found;
+	  snprintf (modpath, sizeof (modpath) - 1, "%s/%s_qj.so", dir,
+		    modname);
+	  if (!access (modpath, R_OK))
+	    goto found;
+	  snprintf (modpath, sizeof (modpath) - 1, "%s/%s_qk.so", dir,
+		    modname);
+	  if (!access (modpath, R_OK))
+	    goto found;
+	};
+      if (!modpath[0])
+	{
+	  fprintf (stderr, "QISH cannot find module %s in dirpath %s\n",
+		   modname, dirpath);
+	  return -1;
+	};
+    }
+  else
+    {				/* no dirpath, so use usual dlopen with LD_LIBRARY_PATH */
+      snprintf (modpath, sizeof (modpath) - 1, "%s_qi.so", modname);
       if (!access (modpath, R_OK))
 	goto found;
-      snprintf (modpath, sizeof (modpath) - 1, "%s/%s_qj.so", dirname,
-		modname);
+      snprintf (modpath, sizeof (modpath) - 1, "%s_qj.so", modname);
       if (!access (modpath, R_OK))
 	goto found;
-      snprintf (modpath, sizeof (modpath) - 1, "%s/%s_qk.so", dirname,
-		modname);
+      snprintf (modpath, sizeof (modpath) - 1, "%s_qk.so", modname);
       if (!access (modpath, R_OK))
 	goto found;
     };
-    if (dir && dir[0]) {
-      snprintf (modpath, sizeof (modpath) - 1, "%s/%s_qi.so", dir, modname);
-      if (!access (modpath, R_OK))
-	goto found;
-      snprintf (modpath, sizeof (modpath) - 1, "%s/%s_qj.so", dir, modname);
-      if (!access (modpath, R_OK))
-	goto found;
-      snprintf (modpath, sizeof (modpath) - 1, "%s/%s_qk.so", dir, modname);
-      if (!access (modpath, R_OK))
-	goto found;
-    };
-    if (!modpath[0]) {
-      fprintf (stderr, "QISH cannot find module %s in dirpath %s\n",
-	       modname, dirpath);
-      return -1;
-    };
-  } else {			/* no dirpath, so use usual dlopen with LD_LIBRARY_PATH */
-    snprintf (modpath, sizeof (modpath) - 1, "%s_qi.so", modname);
-    if (!access (modpath, R_OK))
-      goto found;
-    snprintf (modpath, sizeof (modpath) - 1, "%s_qj.so", modname);
-    if (!access (modpath, R_OK))
-      goto found;
-    snprintf (modpath, sizeof (modpath) - 1, "%s_qk.so", modname);
-    if (!access (modpath, R_OK))
-      goto found;
-  };
 found:
   dlh = dlopen (modpath, RTLD_GLOBAL | RTLD_NOW);
-  if (!dlh) {
-    fprintf (stderr,
-	     "QISH cannot load module %s at %d (path %s, dirpath %s) - %s\n",
-	     modname, modrank, modpath, dirpath ? : "*none*", dlerror ());
-    return -1;
-  };
+  if (!dlh)
+    {
+      fprintf (stderr,
+	       "QISH cannot load module %s at %d (path %s, dirpath %s) - %s\n",
+	       modname, modrank, modpath, dirpath ? : "*none*", dlerror ());
+      return -1;
+    };
   qish_dbgprintf ("module %s named %s is dlopened as %p", modpath, modname,
 		  dlh);
-  if (qish_moduletab[modrank].km_handle) {
-    qish_dbgprintf ("postponing dlclose of %p",
-		    qish_moduletab[modrank].km_handle);
-    postpone_dlclose (qish_moduletab[modrank].km_handle);
-  };
+  if (qish_moduletab[modrank].km_handle)
+    {
+      qish_dbgprintf ("postponing dlclose of %p",
+		      qish_moduletab[modrank].km_handle);
+      postpone_dlclose (qish_moduletab[modrank].km_handle);
+    };
   strncpy (qish_moduletab[modrank].km_name, modname,
 	   sizeof (qish_moduletab[modrank].km_name) - 1);
   snprintf (modpath, sizeof (modpath) - 1, "qishinit_%s", modname);
@@ -455,35 +503,43 @@ qish_get_symbol (char *name, int modrank)
   void *h = 0;
   int i = 0;
   assert (modrank < QISH_MAX_MODULE);
-  if (modrank >= 0) {
-    assert (qish_moduletab[modrank].km_name[0]);	//used module rank
-    if (qish_moduletab[modrank].km_handle != 0)
-      h = dlsym (qish_moduletab[modrank].km_handle, name);
-    if (!wholeprog_dlh)
-      wholeprog_dlh = dlopen ((char *) 0, RTLD_NOW | RTLD_GLOBAL);
-    if (!h)
-      h = dlsym (wholeprog_dlh, name);
-    if (!h) {
-      fprintf (stderr, "qish cannot find symbol %s in module #%d = %s - %s\n",
-	       name, modrank, qish_moduletab[modrank].km_name, dlerror ());
-      return 0;
+  if (modrank >= 0)
+    {
+      assert (qish_moduletab[modrank].km_name[0]);	//used module rank
+      if (qish_moduletab[modrank].km_handle != 0)
+	h = dlsym (qish_moduletab[modrank].km_handle, name);
+      if (!wholeprog_dlh)
+	wholeprog_dlh = dlopen ((char *) 0, RTLD_NOW | RTLD_GLOBAL);
+      if (!h)
+	h = dlsym (wholeprog_dlh, name);
+      if (!h)
+	{
+	  fprintf (stderr,
+		   "qish cannot find symbol %s in module #%d = %s - %s\n",
+		   name, modrank, qish_moduletab[modrank].km_name,
+		   dlerror ());
+	  return 0;
+	}
     }
-  } else {
-    // scan module downwards (from younguest to oldest)
-    for (i = QISH_MAX_MODULE - 1; i >= 0; i--)
-      if (qish_moduletab[i].km_handle != 0) {
-	h = dlsym (qish_moduletab[i].km_handle, name);
-	if (h)
-	  break;
-      };
-    if (!h)
-      h = dlsym (wholeprog_dlh, name);
-    if (!h) {
-      fprintf (stderr, "qish cannot find symbol %s in any module - %s\n",
-	       name, dlerror ());
-      return 0;
-    };
-  }
+  else
+    {
+      // scan module downwards (from younguest to oldest)
+      for (i = QISH_MAX_MODULE - 1; i >= 0; i--)
+	if (qish_moduletab[i].km_handle != 0)
+	  {
+	    h = dlsym (qish_moduletab[i].km_handle, name);
+	    if (h)
+	      break;
+	  };
+      if (!h)
+	h = dlsym (wholeprog_dlh, name);
+      if (!h)
+	{
+	  fprintf (stderr, "qish cannot find symbol %s in any module - %s\n",
+		   name, dlerror ());
+	  return 0;
+	};
+    }
   return h;
 }				// end of qish_get_symbol
 
@@ -501,10 +557,11 @@ qish_unload_module (int modrank)
 		  qish_moduletab[modrank].km_name);
   memset (nampath, 0, sizeof (nampath));
   for (i = 0; i < NBPOSTPONEDLCLOSE; i++)
-    if (postponed_hdl[i] == 0) {
-      postponed_hdl[i] = qish_moduletab[modrank].km_handle;
-      break;
-    };
+    if (postponed_hdl[i] == 0)
+      {
+	postponed_hdl[i] = qish_moduletab[modrank].km_handle;
+	break;
+      };
   snprintf (nampath, sizeof (nampath) - 1, "qishfini_%s",
 	    qish_moduletab[modrank].km_name);
   fini = dlsym (qish_moduletab[modrank].km_handle, nampath);
@@ -564,17 +621,22 @@ qish_strhash (const char *str, int len)
   unsigned h = 0;
   int i = 0;
   const signed char *p = (const signed char *) str;
-  if (len < 0) {
-    for (; *p; i++, p++) {
-      h = (h << 6) ^ (i - *p);
-      h &= (unsigned) INT_MAX;
+  if (len < 0)
+    {
+      for (; *p; i++, p++)
+	{
+	  h = (h << 6) ^ (i - *p);
+	  h &= (unsigned) INT_MAX;
+	}
     }
-  } else {
-    for (; len > 0; i++, p++, len--) {
-      h = (h << 6) ^ (i - *p);
-      h &= (unsigned) INT_MAX;
+  else
+    {
+      for (; len > 0; i++, p++, len--)
+	{
+	  h = (h << 6) ^ (i - *p);
+	  h &= (unsigned) INT_MAX;
+	}
     }
-  }
   return h;
 }				// end of qish_strhash 
 
@@ -592,33 +654,41 @@ qish_sigexecvp (const char *file, char *const argv[])
   if (sigprocmask (SIG_SETMASK, &allsigs, &oldsigs))
     qish_panic ("cannot block all signals - %s", strerror (errno));
   cpid = fork ();
-  if (cpid == 0) {
-    /* child process */
-    if (execvp (file, argv))
-      qish_panic ("execvp %s failed - %s", file, strerror (errno));
-    /* NOTREACHED */
-    exit (1);
-  } else if (cpid > 0) {
-    /* father process */
-    if (sigprocmask (SIG_SETMASK, &oldsigs, 0))
-      qish_panic ("cannot unblock signals - %s", strerror (errno));
-    for (;;) {
-      waitstat = 0;
-      wpid = waitpid (cpid, &waitstat, 0);
-      if (wpid == cpid)
-	break;
-      if (wpid == -1 && errno == EINTR)
-	continue;
-      if (wpid == -1 && errno == ECHILD)
-	break;
-    };
-    if (WIFSIGNALED (waitstat)) {
-      fprintf (stderr, "qish subcommand %s terminated by signal %d = %s\n",
-	       file, WTERMSIG (waitstat), strsignal(WTERMSIG (waitstat)));
-      return -1;
-    } else
-      return WEXITSTATUS (waitstat);
-  } else
+  if (cpid == 0)
+    {
+      /* child process */
+      if (execvp (file, argv))
+	qish_panic ("execvp %s failed - %s", file, strerror (errno));
+      /* NOTREACHED */
+      exit (1);
+    }
+  else if (cpid > 0)
+    {
+      /* father process */
+      if (sigprocmask (SIG_SETMASK, &oldsigs, 0))
+	qish_panic ("cannot unblock signals - %s", strerror (errno));
+      for (;;)
+	{
+	  waitstat = 0;
+	  wpid = waitpid (cpid, &waitstat, 0);
+	  if (wpid == cpid)
+	    break;
+	  if (wpid == -1 && errno == EINTR)
+	    continue;
+	  if (wpid == -1 && errno == ECHILD)
+	    break;
+	};
+      if (WIFSIGNALED (waitstat))
+	{
+	  fprintf (stderr,
+		   "qish subcommand %s terminated by signal %d = %s\n", file,
+		   WTERMSIG (waitstat), strsignal (WTERMSIG (waitstat)));
+	  return -1;
+	}
+      else
+	return WEXITSTATUS (waitstat);
+    }
+  else
     /* fork failed */
     qish_epanic ("failed to fork for exec %s", file);
 }				// end of qish_sigexecvp
@@ -632,99 +702,144 @@ qish_sigexecvp (const char *file, char *const argv[])
 int
 qish_decodexmlchar (unsigned char *buf, char **pend)
 {
-  if (*buf == '&') {
-    if (!strncmp ((char*)buf + 1, "lt;", 3)) {
-      *pend = (char*)buf + 4;
-      return '<';
-    } else if (!strncmp ((char*)buf + 1, "gt;", 3)) {
-      *pend = (char*)buf + 4;
-      return '>';
-    } else if (!strncmp ((char*)buf + 1, "amp;", 4)) {
-      *pend = (char*)buf + 5;
-      return '&';
-    } else if (!strncmp ((char*)buf + 1, "apos;", 5)) {
-      *pend = (char*)buf + 6;
-      return '\'';
-    } else if (!strncmp ((char*)buf + 1, "asla;", 5)) {
-      *pend = (char*)buf + 6;
-      return '\\';
-    } else if (!strncmp ((char*)buf + 1, "quot;", 5)) {
-      *pend = (char*)buf + 6;
-      return '\"';
-    } else if (!strncmp ((char*)buf + 1, "nl;", 3)) {
-      *pend = (char*)buf + 4;
-      return '\n';
-    } else if (!strncmp ((char*)buf + 1, "cr;", 3)) {
-      *pend = (char*)buf + 4;
-      return '\r';
-    } else if (!strncmp ((char*)buf + 1, "bel;", 4)) {
-      *pend = (char*)buf + 5;
-      return '\a';
-    } else if (!strncmp ((char*)buf + 1, "ff;", 3)) {
-      *pend = (char*)buf + 4;
-      return '\f';
-    } else if (!strncmp ((char*)buf + 1, "bs;", 3)) {
-      *pend = (char*)buf + 4;
-      return '\b';
-    } else if (!strncmp ((char*)buf + 1, "sp;", 3)) {
-      *pend = (char*)buf + 4;
-      return ' ';
-    } else if (!strncmp ((char*)buf + 1, "tab;", 4)) {
-      *pend = (char*)buf + 5;
-      return '\t';
-    } else if (!strncmp ((char*)buf + 1, "vtb;", 4)) {
-      *pend = (char*)buf + 5;
-      return '\v';
-    } else if (!strncmp ((char*)buf + 1, "esc;", 4)) {
-      *pend = (char*)buf + 5;
-      return 27;
-    } else if (!strncmp ((char*)buf + 1, "del;", 4)) {
-      *pend = (char*)buf + 5;
-      return 127;
-    } else if (!strncmp ((char*)buf + 1, "nul;", 4)) {
-      *pend = (char*)buf + 5;
-      return 0;
-    } else if (!strncmp ((char*)buf + 1, "nbsp;", 5)) {
-      *pend = (char*)buf + 6;
-      return 160;
-    } else if (buf[1] == '#') {
-      char *end;
-      long i = 0;
-      if (isdigit (buf[2])) {
-	for (i = 2; i < 9; i++)
-	  if (!isdigit (buf[i]))
-	    goto shortenoughdec;
-	fprintf (stderr, "bad charcode entity %.10s\n", (char*)buf);
-	*pend = 0;
-	return -1;
-      shortenoughdec:
-	i = strtol ((char*)buf + 2, &end, 10);
-	if (*end == ';') {
-	  *pend = end + 1;
-	  return i;
+  if (*buf == '&')
+    {
+      if (!strncmp ((char *) buf + 1, "lt;", 3))
+	{
+	  *pend = (char *) buf + 4;
+	  return '<';
 	}
-      } else if (buf[2] == 'x' || buf[2] == 'X') {
-	for (i = 3; i < 9; i++)
-	  if (!isxdigit (buf[i]))
-	    goto shortenoughhex;
-	fprintf (stderr, "bad charhexcode entity %.10s\n", buf);
-	*pend = 0;
-	return -1;
-      shortenoughhex:
-	i = strtol ((char*)buf + 3, &end, 16);
-	if (*end == ';') {
-	  *pend = end + 1;
-	  return i;
+      else if (!strncmp ((char *) buf + 1, "gt;", 3))
+	{
+	  *pend = (char *) buf + 4;
+	  return '>';
 	}
-      }
+      else if (!strncmp ((char *) buf + 1, "amp;", 4))
+	{
+	  *pend = (char *) buf + 5;
+	  return '&';
+	}
+      else if (!strncmp ((char *) buf + 1, "apos;", 5))
+	{
+	  *pend = (char *) buf + 6;
+	  return '\'';
+	}
+      else if (!strncmp ((char *) buf + 1, "asla;", 5))
+	{
+	  *pend = (char *) buf + 6;
+	  return '\\';
+	}
+      else if (!strncmp ((char *) buf + 1, "quot;", 5))
+	{
+	  *pend = (char *) buf + 6;
+	  return '\"';
+	}
+      else if (!strncmp ((char *) buf + 1, "nl;", 3))
+	{
+	  *pend = (char *) buf + 4;
+	  return '\n';
+	}
+      else if (!strncmp ((char *) buf + 1, "cr;", 3))
+	{
+	  *pend = (char *) buf + 4;
+	  return '\r';
+	}
+      else if (!strncmp ((char *) buf + 1, "bel;", 4))
+	{
+	  *pend = (char *) buf + 5;
+	  return '\a';
+	}
+      else if (!strncmp ((char *) buf + 1, "ff;", 3))
+	{
+	  *pend = (char *) buf + 4;
+	  return '\f';
+	}
+      else if (!strncmp ((char *) buf + 1, "bs;", 3))
+	{
+	  *pend = (char *) buf + 4;
+	  return '\b';
+	}
+      else if (!strncmp ((char *) buf + 1, "sp;", 3))
+	{
+	  *pend = (char *) buf + 4;
+	  return ' ';
+	}
+      else if (!strncmp ((char *) buf + 1, "tab;", 4))
+	{
+	  *pend = (char *) buf + 5;
+	  return '\t';
+	}
+      else if (!strncmp ((char *) buf + 1, "vtb;", 4))
+	{
+	  *pend = (char *) buf + 5;
+	  return '\v';
+	}
+      else if (!strncmp ((char *) buf + 1, "esc;", 4))
+	{
+	  *pend = (char *) buf + 5;
+	  return 27;
+	}
+      else if (!strncmp ((char *) buf + 1, "del;", 4))
+	{
+	  *pend = (char *) buf + 5;
+	  return 127;
+	}
+      else if (!strncmp ((char *) buf + 1, "nul;", 4))
+	{
+	  *pend = (char *) buf + 5;
+	  return 0;
+	}
+      else if (!strncmp ((char *) buf + 1, "nbsp;", 5))
+	{
+	  *pend = (char *) buf + 6;
+	  return 160;
+	}
+      else if (buf[1] == '#')
+	{
+	  char *end;
+	  long i = 0;
+	  if (isdigit (buf[2]))
+	    {
+	      for (i = 2; i < 9; i++)
+		if (!isdigit (buf[i]))
+		  goto shortenoughdec;
+	      fprintf (stderr, "bad charcode entity %.10s\n", (char *) buf);
+	      *pend = 0;
+	      return -1;
+	    shortenoughdec:
+	      i = strtol ((char *) buf + 2, &end, 10);
+	      if (*end == ';')
+		{
+		  *pend = end + 1;
+		  return i;
+		}
+	    }
+	  else if (buf[2] == 'x' || buf[2] == 'X')
+	    {
+	      for (i = 3; i < 9; i++)
+		if (!isxdigit (buf[i]))
+		  goto shortenoughhex;
+	      fprintf (stderr, "bad charhexcode entity %.10s\n", buf);
+	      *pend = 0;
+	      return -1;
+	    shortenoughhex:
+	      i = strtol ((char *) buf + 3, &end, 16);
+	      if (*end == ';')
+		{
+		  *pend = end + 1;
+		  return i;
+		}
+	    }
+	};
+      fprintf (stderr, "bad char entity %.8s\n", (char *) buf);
+      *pend = 0;
+      return -1;
+    }
+  else if (isprint (*buf))
+    {
+      *pend = (char *) buf + 1;
+      return *buf;
     };
-    fprintf (stderr, "bad char entity %.8s\n", (char*)buf);
-    *pend = 0;
-    return -1;
-  } else if (isprint (*buf)) {
-    *pend = (char*)buf + 1;
-    return *buf;
-  };
   *pend = 0;
   return -1;
 }				// end of  qish_decodexmlchar
@@ -735,86 +850,95 @@ qish_encodexmlchar (int c, char *buf)
 {
   if (c < 0 || c > 0xffff)
     return 0;
-  switch (c) {
+  switch (c)
+    {
 #define PUTENT(E) strcpy(buf, E); return buf+sizeof(E)-1
-  case '<':
-    PUTENT ("&lt;");
-  case '>':
-    PUTENT ("&gt;");
-  case '&':
-    PUTENT ("&amp;");
-  case '\'':
-    PUTENT ("&apos;");
-  case '\\':
-    PUTENT ("&asla;");
-  case '\"':
-    PUTENT ("&quot;");
-  case '\n':
-    PUTENT ("&nl;");
-  case '\r':
-    PUTENT ("&cr;");
-  case '\a':
-    PUTENT ("&bel;");
-  case '\f':
-    PUTENT ("&ff;");
-  case '\b':
-    PUTENT ("&bs;");
-  case '\t':
-    PUTENT ("&tab;");
-  case '\v':
-    PUTENT ("&vtb;");
-  case 27:
-    PUTENT ("&esc;");
-  case 127:
-    PUTENT ("&del;");
-  case 0:
-    PUTENT ("&nul;");
-  case 160:
-    PUTENT ("&nbsp;");
+    case '<':
+      PUTENT ("&lt;");
+    case '>':
+      PUTENT ("&gt;");
+    case '&':
+      PUTENT ("&amp;");
+    case '\'':
+      PUTENT ("&apos;");
+    case '\\':
+      PUTENT ("&asla;");
+    case '\"':
+      PUTENT ("&quot;");
+    case '\n':
+      PUTENT ("&nl;");
+    case '\r':
+      PUTENT ("&cr;");
+    case '\a':
+      PUTENT ("&bel;");
+    case '\f':
+      PUTENT ("&ff;");
+    case '\b':
+      PUTENT ("&bs;");
+    case '\t':
+      PUTENT ("&tab;");
+    case '\v':
+      PUTENT ("&vtb;");
+    case 27:
+      PUTENT ("&esc;");
+    case 127:
+      PUTENT ("&del;");
+    case 0:
+      PUTENT ("&nul;");
+    case 160:
+      PUTENT ("&nbsp;");
 #undef PUTENT
-  case ' ':
-    *buf = ' ';
-    return buf + 1;
-  default:
-    if (c < 0xff && isgraph (c)) {
-      *buf = c;
+    case ' ':
+      *buf = ' ';
       return buf + 1;
-    } else {
-      sprintf (buf, "&#%d;", c);
-      return buf + strlen (buf);
-    };
-  }
+    default:
+      if (c < 0xff && isgraph (c))
+	{
+	  *buf = c;
+	  return buf + 1;
+	}
+      else
+	{
+	  sprintf (buf, "&#%d;", c);
+	  return buf + strlen (buf);
+	};
+    }
   return 0;
 }				// end of qish_encodexmlchar
 
 int
-qish_getxmlc (FILE * f, int strict)
+qish_getxmlc (FILE *f, int strict)
 {
   int c = -1;
   char buf[16];
   if (!f)
     return EOF;
   c = getc (f);
-  if (c == '&') {
-    int i;
-    char *end;
-    memset (buf, 0, sizeof (buf));
-    buf[0] = '&';
-    for (i = 1; i < (int) sizeof (buf) - 2; i++) {
-      c = getc (f);
-      if (c < 0)
-	return -1;
-      buf[i] = c;
-      if (c == ';')
-	break;
-    };
-    c = qish_decodexmlchar ((unsigned char*)buf, &end);
-  } else if (strict) {
-    if (c == '\'' || c == '\"' || c == '<' || c == '>') {
-      ungetc (c, f);
-      return -2;
+  if (c == '&')
+    {
+      int i;
+      char *end;
+      memset (buf, 0, sizeof (buf));
+      buf[0] = '&';
+      for (i = 1; i < (int) sizeof (buf) - 2; i++)
+	{
+	  c = getc (f);
+	  if (c < 0)
+	    return -1;
+	  buf[i] = c;
+	  if (c == ';')
+	    break;
+	};
+      c = qish_decodexmlchar ((unsigned char *) buf, &end);
     }
-  }
+  else if (strict)
+    {
+      if (c == '\'' || c == '\"' || c == '<' || c == '>')
+	{
+	  ungetc (c, f);
+	  return -2;
+	}
+    }
   return c;
 }				// end of qish_getxmlc
 
@@ -871,17 +995,17 @@ static const int primtab[] = {
 static const short primememotab[] = {
   /// if changed here also change primtab above
   // parenthesis are required to make indent happy
-  [(0)...(2)] 3,[(3)...(4)] 5,[(5)...(6)] 7,
-  [(7)...(10)] 11,[(11)...(12)] 13,[(13)...(16)] 17,
-  [(17)...(18)] 19,[(19)...(22)] 23,[(23)...(28)] 29,
-  [(29)...(30)] 31,[(31)...(36)] 37,[(37)...(40)] 41,
-  [(41)...(46)] 47,[(47)...(58)] 59,[(59)...(66)] 67,
-  [(67)...(72)] 73,[(73)...(82)] 83,[(83)...(96)] 97,
-  [(97)...(106)] 107,[(107)...(112)] 113,[(113)...(126)] 127,
-  [(127)...(136)] 137,[(137)...(148)] 149,[(149)...(162)] 163,
-  [(163)...(178)] 179,[(179)...(190)] 191,[(191)...(198)] 199,
-  [(199)...(210)] 211,[(211)...(222)] 223,[(223)...(238)] 239,
-  [(239)...(250)] 251,[(251)...(268)] 269,[(269)...(292)] 293
+  [(0) ... (2)] 3,[(3) ... (4)] 5,[(5) ... (6)] 7,
+  [(7) ... (10)] 11,[(11) ... (12)] 13,[(13) ... (16)] 17,
+  [(17) ... (18)] 19,[(19) ... (22)] 23,[(23) ... (28)] 29,
+  [(29) ... (30)] 31,[(31) ... (36)] 37,[(37) ... (40)] 41,
+  [(41) ... (46)] 47,[(47) ... (58)] 59,[(59) ... (66)] 67,
+  [(67) ... (72)] 73,[(73) ... (82)] 83,[(83) ... (96)] 97,
+  [(97) ... (106)] 107,[(107) ... (112)] 113,[(113) ... (126)] 127,
+  [(127) ... (136)] 137,[(137) ... (148)] 149,[(149) ... (162)] 163,
+  [(163) ... (178)] 179,[(179) ... (190)] 191,[(191) ... (198)] 199,
+  [(199) ... (210)] 211,[(211) ... (222)] 223,[(223) ... (238)] 239,
+  [(239) ... (250)] 251,[(251) ... (268)] 269,[(269) ... (292)] 293
 };
 #endif /* __GNUC__ && !STRICT_C99 */
 
@@ -897,24 +1021,27 @@ qish_prime_after (int x)
   tablen = (sizeof (primtab) / sizeof (int)) - 1;
   lo = 0;
   hi = tablen - 1;
-  while (lo + 2 < hi) {
-    int mid = (lo + hi) / 2;
-    int midval = primtab[mid];
-    if (x > midval)
-      lo = mid;
-    else
-      hi = mid;
-  };
-  for (;;) {
-    int loval = primtab[lo];
-    if (loval > x)
-      return loval;
-    else if (loval <= 0) {
-      fprintf (stderr, "qish got no prime after %d\n", x);
-      return 0;
+  while (lo + 2 < hi)
+    {
+      int mid = (lo + hi) / 2;
+      int midval = primtab[mid];
+      if (x > midval)
+	lo = mid;
+      else
+	hi = mid;
     };
-    lo++;
-  }
+  for (;;)
+    {
+      int loval = primtab[lo];
+      if (loval > x)
+	return loval;
+      else if (loval <= 0)
+	{
+	  fprintf (stderr, "qish got no prime after %d\n", x);
+	  return 0;
+	};
+      lo++;
+    }
 }
 
 /* eof lib/qiutil.c */

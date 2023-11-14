@@ -94,16 +94,17 @@ static const int kArraySize = 2000000;	// about 16Mb
 static const int kMinTreeDepth = 4;
 static const int kMaxTreeDepth = 20;
 
-typedef struct Node0_struct {
+typedef struct Node0_struct
+{
   int i, j;			// Qish requires the node to start with a never zero word
   struct Node0_struct *left;
   struct Node0_struct *right;
 } Node0;
 
 #ifdef HOLES
-#   define HOLE() GC_NEW(Node0);
+#define HOLE() GC_NEW(Node0);
 #else
-#   define HOLE()
+#define HOLE()
 #endif
 
 typedef Node0 *Node;
@@ -129,12 +130,14 @@ init_Node (Node QISHVOLATILE me, Node QISHVOLATILE l, Node QISHVOLATILE r)
 void
 destroy_Node (Node me)
 {
-  if (me->left) {
-    destroy_Node (me->left);
-  }
-  if (me->right) {
-    destroy_Node (me->right);
-  }
+  if (me->left)
+    {
+      destroy_Node (me->left);
+    }
+  if (me->right)
+    {
+      destroy_Node (me->right);
+    }
   free (me);
 }
 #endif
@@ -161,47 +164,50 @@ Populate (int iDepth, Node QISHVOLATILE thisNode)
   Node QISHVOLATILE newNode = 0;
   BEGIN_SIMPLE_FRAME (1, thisNode, 1, newNode);
 #endif
-  if (iDepth <= 0) {
+  if (iDepth <= 0)
+    {
 #ifdef QISH
-    goto end;
+      goto end;
 #else
-    return;
+      return;
 #endif
-  } else {
-    iDepth--;
+    }
+  else
+    {
+      iDepth--;
 #if defined(GC)
-    thisNode->left = GC_NEW (Node0);
-    HOLE ();
-    thisNode->right = GC_NEW (Node0);
-    HOLE ();
+      thisNode->left = GC_NEW (Node0);
+      HOLE ();
+      thisNode->right = GC_NEW (Node0);
+      HOLE ();
 #elif defined(QISH)
-    // left
-    newNode = qish_allocate (sizeof (Node0));
-    newNode->i = -1;		// the first word have to be non zero for Qish
-    thisNode->left = newNode;
-    qish_write_notify (thisNode);
+      // left
+      newNode = qish_allocate (sizeof (Node0));
+      newNode->i = -1;		// the first word have to be non zero for Qish
+      thisNode->left = newNode;
+      qish_write_notify (thisNode);
 #ifdef HOLES
-    // allocate a useless node
-    newNode = qish_allocate (sizeof (Node0));
-    newNode->i = -5;
+      // allocate a useless node
+      newNode = qish_allocate (sizeof (Node0));
+      newNode->i = -5;
 #endif
-    // right
-    newNode = qish_allocate (sizeof (Node0));
-    newNode->i = -1;		// the first word have to be non zero for Qish
-    thisNode->right = newNode;
-    qish_write_notify (thisNode);
+      // right
+      newNode = qish_allocate (sizeof (Node0));
+      newNode->i = -1;		// the first word have to be non zero for Qish
+      thisNode->right = newNode;
+      qish_write_notify (thisNode);
 #ifdef HOLES
-    // allocate a useless node
-    newNode = qish_allocate (sizeof (Node0));
-    newNode->i = -5;
+      // allocate a useless node
+      newNode = qish_allocate (sizeof (Node0));
+      newNode->i = -5;
 #endif
 #else
-    thisNode->left = calloc (1, sizeof (Node0));
-    thisNode->right = calloc (1, sizeof (Node0));
+      thisNode->left = calloc (1, sizeof (Node0));
+      thisNode->right = calloc (1, sizeof (Node0));
 #endif
-    Populate (iDepth, thisNode->left);
-    Populate (iDepth, thisNode->right);
-  }
+      Populate (iDepth, thisNode->left);
+      Populate (iDepth, thisNode->right);
+    }
 #ifdef QISH
 end:
   EXIT_FRAME ();
@@ -216,51 +222,56 @@ MakeTree (int iDepth)
   Node left, right;
   Node result;
 #else
-  struct {
+  struct
+  {
     Node QISHVOLATILE _left, _right, _result;
   } _locals_ = {
-  0, 0, 0};
+    0, 0, 0
+  };
 #define result _locals_._result
 #define left _locals_._left
 #define right _locals_._right
   BEGIN_LOCAL_FRAME (0, qish_nil);
 #endif
-  if (iDepth <= 0) {
+  if (iDepth <= 0)
+    {
 #if !defined(GC) && !defined(QISH)
-    result = calloc (1, sizeof (Node0));
-    /* result is implicitly initialized  */
-    return result;
+      result = calloc (1, sizeof (Node0));
+      /* result is implicitly initialized  */
+      return result;
 #elif defined(GC)
-    result = GC_NEW (Node0);
-    HOLE ();
-    /* result is implicitly initialized  */
-    return result;
-#else /*QISH*/
-      result = qish_allocate (sizeof (Node0));
-    result->i = -1;
-    goto end;
+      result = GC_NEW (Node0);
+      HOLE ();
+      /* result is implicitly initialized  */
+      return result;
+#else  /*QISH*/
+	result = qish_allocate (sizeof (Node0));
+      result->i = -1;
+      goto end;
 #endif
-  } else {
-    /* originally left and right where declared here - Basile declares
-       them at start of function */
-    left = MakeTree (iDepth - 1);
-    right = MakeTree (iDepth - 1);
+    }
+  else
+    {
+      /* originally left and right where declared here - Basile declares
+         them at start of function */
+      left = MakeTree (iDepth - 1);
+      right = MakeTree (iDepth - 1);
 #if !defined(GC) && !defined(QISH)
-    result = malloc (sizeof (Node0));
+      result = malloc (sizeof (Node0));
 #elif defined(GC)
-    result = GC_NEW (Node0);
-    HOLE ();
-#else /*QISH*/
-      result = qish_allocate (sizeof (Node0));
-    result->i = -2;
+      result = GC_NEW (Node0);
+      HOLE ();
+#else  /*QISH*/
+	result = qish_allocate (sizeof (Node0));
+      result->i = -2;
 #endif
-    init_Node (result, left, right);
+      init_Node (result, left, right);
 #ifdef QISH
-    goto end;
+      goto end;
 #else
-    return result;
+      return result;
 #endif
-  }
+    }
 #ifdef QISH
 end:
   EXIT_FRAME ();
@@ -296,33 +307,35 @@ TimeConstruction (int depth)
   printf ("Creating %d trees of depth %d\n", iNumIters, depth);
 
   tStart = currentTime ();
-  for (i = 0; i < iNumIters; ++i) {
+  for (i = 0; i < iNumIters; ++i)
+    {
 #if !defined(GC) && !defined(QISH)
-    tempTree = calloc (1, sizeof (Node0));
+      tempTree = calloc (1, sizeof (Node0));
 #elif defined(GC)
-    tempTree = GC_NEW (Node0);
-#else /*QISH*/
-      tempTree = qish_allocate (sizeof (Node0));
-    tempTree->i = -3;
+      tempTree = GC_NEW (Node0);
+#else  /*QISH*/
+	tempTree = qish_allocate (sizeof (Node0));
+      tempTree->i = -3;
 #endif
-    Populate (depth, tempTree);
+      Populate (depth, tempTree);
 #if !defined(GC) && !defined(QISH)
-    destroy_Node (tempTree);
+      destroy_Node (tempTree);
 #endif
-    tempTree = 0;
-  }
+      tempTree = 0;
+    }
   tFinish = currentTime ();
   printf ("\tTop down construction took %d msec\n",
 	  elapsedTime (tFinish - tStart));
 
   tStart = currentTime ();
-  for (i = 0; i < iNumIters; ++i) {
-    tempTree = MakeTree (depth);
+  for (i = 0; i < iNumIters; ++i)
+    {
+      tempTree = MakeTree (depth);
 #if !defined(GC) && !defined(QISH)
-    destroy_Node (tempTree);
+      destroy_Node (tempTree);
 #endif
-    tempTree = 0;
-  }
+      tempTree = 0;
+    }
   tFinish = currentTime ();
   printf ("\tBottom up construction took %d msec\n",
 	  elapsedTime (tFinish - tStart));
@@ -346,10 +359,12 @@ qishmain ()
   Node longLivedTree;
   Node tempTree;
 #else
-  struct {
+  struct
+  {
     Node QISHVOLATILE _root, _longLivedTree, _tempTree;
   } _locals_ = {
-  0, 0, 0};
+    0, 0, 0
+  };
 #define root _locals_._root
 #define longLivedTree _locals_._longLivedTree
 #define tempTree _locals_._tempTree
@@ -425,14 +440,16 @@ qishmain ()
   array = GC_MALLOC (sizeof (double) * kArraySize);
 #endif
 #endif
-  for (i = 0; i < kArraySize / 2; ++i) {
-    array[i] = 1.0 / i;
-  }
+  for (i = 0; i < kArraySize / 2; ++i)
+    {
+      array[i] = 1.0 / i;
+    }
   PrintDiagnostics ();
 
-  for (d = kMinTreeDepth; d <= kMaxTreeDepth; d += 2) {
-    TimeConstruction (d);
-  }
+  for (d = kMinTreeDepth; d <= kMaxTreeDepth; d += 2)
+    {
+      TimeConstruction (d);
+    }
 
   if (longLivedTree == 0 || array[1000] != 1.0 / 1000)
     fprintf (stderr, "Failed\n");

@@ -165,8 +165,8 @@ void (*qish_full_posthook_p) (void) = 0;
 int qish_debug;
 
 // C++ hooks
-void (*qishcpp_minor_p)(void);
-void (*qishcpp_full_p)(void);
+void (*qishcpp_minor_p) (void);
+void (*qishcpp_full_p) (void);
 
 
 // actually we should protect this by a mutex, but we believe mutexes
@@ -204,13 +204,15 @@ qishgc_dbgmemap_at (const char *msg, int lineno)
   if (!f)
     qish_panic_at (errno, __FILE__, lineno, 0, "Cannot open mem.maps [%s]",
 		   msg);
-  fprintf (stderr,"\n%s:%d. *** memory map : %s ***\n", __FILE__, lineno, msg);
-  while (!feof (f)) {
-    memset (linbuf, 0, sizeof (linbuf));
-    fgets (linbuf, sizeof (linbuf) - 1, f);
-    if (!strchr (linbuf, '/'))
-      fputs (linbuf, stderr);
-  }
+  fprintf (stderr, "\n%s:%d. *** memory map : %s ***\n", __FILE__, lineno,
+	   msg);
+  while (!feof (f))
+    {
+      memset (linbuf, 0, sizeof (linbuf));
+      fgets (linbuf, sizeof (linbuf) - 1, f);
+      if (!strchr (linbuf, '/'))
+	fputs (linbuf, stderr);
+    }
   fclose (f);
   putc ('\n', stderr);
 }
@@ -228,10 +230,11 @@ qishgc_getmem_at (const char *msg, int sz, int lineno)
 {
   char *mem;
   /* round up the size */
-  if (sz & (QISH_PAGESIZE - 1)) {
-    sz = sz | (QISH_PAGESIZE - 1);
-    sz++;
-  };
+  if (sz & (QISH_PAGESIZE - 1))
+    {
+      sz = sz | (QISH_PAGESIZE - 1);
+      sz++;
+    };
 #ifdef TRACEMEM
   if (qish_tracememfile)
     fprintf (qish_tracememfile, "GETMEM sz=%06dk; lin=%03d; msg=%s\n",
@@ -254,8 +257,8 @@ qishgc_getmem_at (const char *msg, int sz, int lineno)
 		   mem + sz, msg, sz >> 10);
 #ifndef NDEBUG
   if (qish_debug)
-    fprintf (stderr,"%s:%d:: getmem [%s] %dKbytes => %p-%p\n", __FILE__, lineno, msg,
-	    sz >> 10, mem, mem + sz);
+    fprintf (stderr, "%s:%d:: getmem [%s] %dKbytes => %p-%p\n", __FILE__,
+	     lineno, msg, sz >> 10, mem, mem + sz);
 #endif
   return mem;
 }				/* end of qishgc_getmem_at */
@@ -269,10 +272,11 @@ qishgc_getexecmem_at (const char *msg, int sz, int lineno)
 {
   char *mem;
   /* round up the size */
-  if (sz & (QISH_PAGESIZE - 1)) {
-    sz = sz | (QISH_PAGESIZE - 1);
-    sz++;
-  };
+  if (sz & (QISH_PAGESIZE - 1))
+    {
+      sz = sz | (QISH_PAGESIZE - 1);
+      sz++;
+    };
 #ifdef TRACEMEM
   if (qish_tracememfile)
     fprintf (qish_tracememfile, "GETMEM sz=%06dk; lin=%03d; msg=%s\n",
@@ -296,8 +300,8 @@ qishgc_getexecmem_at (const char *msg, int sz, int lineno)
 		   mem + sz, msg, sz >> 10);
 #ifndef NDEBUG
   if (qish_debug)
-    fprintf (stderr,"%s:%d:: getexecmem [%s] %dKbytes => %p-%p\n", __FILE__, lineno,
-	    msg, sz >> 10, mem, mem + sz);
+    fprintf (stderr, "%s:%d:: getexecmem [%s] %dKbytes => %p-%p\n", __FILE__,
+	     lineno, msg, sz >> 10, mem, mem + sz);
 #endif
   return mem;
 }				/* end of qishgc_getexecmem_at */
@@ -309,14 +313,16 @@ static void
 qishgc_releasemem_at (const char *msg, void *mem, int sz, int lineno)
 {
   /* round up the size */
-  if (sz & (QISH_PAGESIZE - 1)) {
-    sz = sz | (QISH_PAGESIZE - 1);
-    sz++;
-  };
+  if (sz & (QISH_PAGESIZE - 1))
+    {
+      sz = sz | (QISH_PAGESIZE - 1);
+      sz++;
+    };
 #ifdef TRACEMEM
   if (qish_tracememfile)
-    fprintf (stderr,qish_tracememfile, "RELEASEMEM sz=%06dk; lin=%03d; msg=%s\n",
-	     (sz) >> 10, lineno, msg);
+    fprintf (stderr, qish_tracememfile,
+	     "RELEASEMEM sz=%06dk; lin=%03d; msg=%s\n", (sz) >> 10, lineno,
+	     msg);
 #endif /*TRACEMEM*/
     if (munmap (mem, sz))
     qish_panic_at (errno, __FILE__, lineno, 0,
@@ -324,8 +330,8 @@ qishgc_releasemem_at (const char *msg, void *mem, int sz, int lineno)
 		   mem, sz >> 10);
 #ifndef NDEBUG
   if (qish_debug)
-    fprintf (stderr,"%s:%d:: releasemem [%s] %dKbytes %p-%p\n", __FILE__, lineno, msg,
-	    sz >> 10, mem, (char *) mem + sz);
+    fprintf (stderr, "%s:%d:: releasemem [%s] %dKbytes %p-%p\n", __FILE__,
+	     lineno, msg, sz >> 10, mem, (char *) mem + sz);
 #endif
 }				/* end of qishgc_releasemem_at */
 
@@ -349,7 +355,8 @@ qishgc_minor (int siz)
     qish_panic
       ("QISH: huge birth memory size requested (%dKbytes, MAX_BIRTH_SIZE is %dKbytes)\n",
        siz >> 10, MAX_BIRTH_SIZE >> 10);
-  qish_dbgprintf ("qishgc_minor siz=%dK birth=%p-%p", siz >> 10, birthlo, birthhi);
+  qish_dbgprintf ("qishgc_minor siz=%dK birth=%p-%p", siz >> 10, birthlo,
+		  birthhi);
   dbgmemap ("before minor gc");
   ///
 #define MINOR_UPDATE(Ptr) {				\
@@ -361,125 +368,131 @@ qishgc_minor (int siz)
   // instead here because it should be faster
   for (n = 0; n < QISH_NB_ROOTS; n++)
     MINOR_UPDATE (((void **) qish_roots)[n]);
-  if (qishgc_changedconstrank > 0) {
-    assert (qishgc_changedconstrank <= QISH_MAX_MODULE);
-    for (n = 0; n < qishgc_changedconstrank; n++)
-      MINOR_UPDATE (qish_moduletab[n].km_constant);
-    qishgc_changedconstrank = 0;
-  };
-  for (n = 0; n < QISH_MAXNBCONST >> 8; n++)
-    if (qish_globconstabwrbar[n]) {
-      int i = 0, j = 0;
-      j = n >> 8;
-      for (i = j; i < j + 256; i++)
-	MINOR_UPDATE (qish_globconstab[i]);
-      qish_globconstabwrbar[n] = 0;
+  if (qishgc_changedconstrank > 0)
+    {
+      assert (qishgc_changedconstrank <= QISH_MAX_MODULE);
+      for (n = 0; n < qishgc_changedconstrank; n++)
+	MINOR_UPDATE (qish_moduletab[n].km_constant);
+      qishgc_changedconstrank = 0;
     };
+  for (n = 0; n < QISH_MAXNBCONST >> 8; n++)
+    if (qish_globconstabwrbar[n])
+      {
+	int i = 0, j = 0;
+	j = n >> 8;
+	for (i = j; i < j + 256; i++)
+	  MINOR_UPDATE (qish_globconstab[i]);
+	qish_globconstabwrbar[n] = 0;
+      };
   //.qish_dbgprintf("minor nbroots=%d qishgcf=%p", n, qishgcf);
   // constants are only scanned with full GC, so changing them always
   // require adding to the store vector; we do not scan constants on
   // minor GC!
   for (fram = (struct qishgc_framedescr_st *) qishgc_birth.bt_qishgcf; fram;
-       fram = (struct qishgc_framedescr_st *) (fram->gcf_prev)) {
-    int i;
-    int nbparams = fram->gcf_point->gcd_nbparam;
-    int nblocals = fram->gcf_point->gcd_nblocal;
-    void **args = fram->gcf_args;
-    void **locals = fram->gcf_locals;
-    //.qish_dbgprintf("minorgc fram=%p args=%p nbparams=%d locals=%p nblocals=%d",
-    //.       fram, args, nbparams, locals, nblocals);
-    assert (args || locals);
-    assert (nbparams >= 0 && nblocals >= 0);
+       fram = (struct qishgc_framedescr_st *) (fram->gcf_prev))
+    {
+      int i;
+      int nbparams = fram->gcf_point->gcd_nbparam;
+      int nblocals = fram->gcf_point->gcd_nblocal;
+      void **args = fram->gcf_args;
+      void **locals = fram->gcf_locals;
+      //.qish_dbgprintf("minorgc fram=%p args=%p nbparams=%d locals=%p nblocals=%d",
+      //.       fram, args, nbparams, locals, nblocals);
+      assert (args || locals);
+      assert (nbparams >= 0 && nblocals >= 0);
 #if QISH_ARGS_UP
-    /* actual arguments have increasing adresses from args; optimize
-       for few arguments */
-    switch (nbparams) {
-    default:
-      for (i = nbparams - 1; i >= 7; i--)
-	MINOR_UPDATE (args[i]);
-    case 7:
-      MINOR_UPDATE (args[6]);	/*fallthru */
-    case 6:
-      MINOR_UPDATE (args[5]);	/*fallthru */
-    case 5:
-      MINOR_UPDATE (args[4]);	/*fallthru */
-    case 4:
-      MINOR_UPDATE (args[3]);	/*fallthru */
-    case 3:
-      MINOR_UPDATE (args[2]);	/*fallthru */
-    case 2:
-      MINOR_UPDATE (args[1]);	/*fallthru */
-    case 1:
-      MINOR_UPDATE (args[0]);	/*fallthru */
-    case 0:
-      break;
-    };
+      /* actual arguments have increasing adresses from args; optimize
+         for few arguments */
+      switch (nbparams)
+	{
+	default:
+	  for (i = nbparams - 1; i >= 7; i--)
+	    MINOR_UPDATE (args[i]);
+	case 7:
+	  MINOR_UPDATE (args[6]);	/*fallthru */
+	case 6:
+	  MINOR_UPDATE (args[5]);	/*fallthru */
+	case 5:
+	  MINOR_UPDATE (args[4]);	/*fallthru */
+	case 4:
+	  MINOR_UPDATE (args[3]);	/*fallthru */
+	case 3:
+	  MINOR_UPDATE (args[2]);	/*fallthru */
+	case 2:
+	  MINOR_UPDATE (args[1]);	/*fallthru */
+	case 1:
+	  MINOR_UPDATE (args[0]);	/*fallthru */
+	case 0:
+	  break;
+	};
 #endif //QISH_ARGS_UP
-    ///////
+      ///////
 #if QISH_ARGS_DOWN
-    /* actual arguments have decreasing adresses from args; optimize
-       for few arguments */
-    switch (nbparams) {
-    default:
-      for (i = nbparams - 1; i >= 7; i--)
-	MINOR_UPDATE (args[-i]);
-    case 7:
-      MINOR_UPDATE (args[-6]);	/*fallthru */
-    case 6:
-      MINOR_UPDATE (args[-5]);	/*fallthru */
-    case 5:
-      MINOR_UPDATE (args[-4]);	/*fallthru */
-    case 4:
-      MINOR_UPDATE (args[-3]);	/*fallthru */
-    case 3:
-      MINOR_UPDATE (args[-2]);	/*fallthru */
-    case 2:
-      MINOR_UPDATE (args[-1]);	/*fallthru */
-    case 1:
-      MINOR_UPDATE (args[0]);	/*fallthru */
-    case 0:;
-    };
+      /* actual arguments have decreasing adresses from args; optimize
+         for few arguments */
+      switch (nbparams)
+	{
+	default:
+	  for (i = nbparams - 1; i >= 7; i--)
+	    MINOR_UPDATE (args[-i]);
+	case 7:
+	  MINOR_UPDATE (args[-6]);	/*fallthru */
+	case 6:
+	  MINOR_UPDATE (args[-5]);	/*fallthru */
+	case 5:
+	  MINOR_UPDATE (args[-4]);	/*fallthru */
+	case 4:
+	  MINOR_UPDATE (args[-3]);	/*fallthru */
+	case 3:
+	  MINOR_UPDATE (args[-2]);	/*fallthru */
+	case 2:
+	  MINOR_UPDATE (args[-1]);	/*fallthru */
+	case 1:
+	  MINOR_UPDATE (args[0]);	/*fallthru */
+	case 0:;
+	};
 #endif //QISH_ARGS_DOWN
-    /* optimize for few locals */
-    switch (nblocals) {
-    default:
-      for (i = nblocals - 1; i >= 16; i--)
-	MINOR_UPDATE (locals[i]);
-    case 16:
-      MINOR_UPDATE (locals[15]);	/*fallthru */
-    case 15:
-      MINOR_UPDATE (locals[14]);	/*fallthru */
-    case 14:
-      MINOR_UPDATE (locals[13]);	/*fallthru */
-    case 13:
-      MINOR_UPDATE (locals[12]);	/*fallthru */
-    case 12:
-      MINOR_UPDATE (locals[11]);	/*fallthru */
-    case 11:
-      MINOR_UPDATE (locals[10]);	/*fallthru */
-    case 10:
-      MINOR_UPDATE (locals[9]);	/*fallthru */
-    case 9:
-      MINOR_UPDATE (locals[8]);	/*fallthru */
-    case 8:
-      MINOR_UPDATE (locals[7]);	/*fallthru */
-    case 7:
-      MINOR_UPDATE (locals[6]);	/*fallthru */
-    case 6:
-      MINOR_UPDATE (locals[5]);	/*fallthru */
-    case 5:
-      MINOR_UPDATE (locals[4]);	/*fallthru */
-    case 4:
-      MINOR_UPDATE (locals[3]);	/*fallthru */
-    case 3:
-      MINOR_UPDATE (locals[2]);	/*fallthru */
-    case 2:
-      MINOR_UPDATE (locals[1]);	/*fallthru */
-    case 1:
-      MINOR_UPDATE (locals[0]);	/*fallthru */
-    case 0:;
+      /* optimize for few locals */
+      switch (nblocals)
+	{
+	default:
+	  for (i = nblocals - 1; i >= 16; i--)
+	    MINOR_UPDATE (locals[i]);
+	case 16:
+	  MINOR_UPDATE (locals[15]);	/*fallthru */
+	case 15:
+	  MINOR_UPDATE (locals[14]);	/*fallthru */
+	case 14:
+	  MINOR_UPDATE (locals[13]);	/*fallthru */
+	case 13:
+	  MINOR_UPDATE (locals[12]);	/*fallthru */
+	case 12:
+	  MINOR_UPDATE (locals[11]);	/*fallthru */
+	case 11:
+	  MINOR_UPDATE (locals[10]);	/*fallthru */
+	case 10:
+	  MINOR_UPDATE (locals[9]);	/*fallthru */
+	case 9:
+	  MINOR_UPDATE (locals[8]);	/*fallthru */
+	case 8:
+	  MINOR_UPDATE (locals[7]);	/*fallthru */
+	case 7:
+	  MINOR_UPDATE (locals[6]);	/*fallthru */
+	case 6:
+	  MINOR_UPDATE (locals[5]);	/*fallthru */
+	case 5:
+	  MINOR_UPDATE (locals[4]);	/*fallthru */
+	case 4:
+	  MINOR_UPDATE (locals[3]);	/*fallthru */
+	case 3:
+	  MINOR_UPDATE (locals[2]);	/*fallthru */
+	case 2:
+	  MINOR_UPDATE (locals[1]);	/*fallthru */
+	case 1:
+	  MINOR_UPDATE (locals[0]);	/*fallthru */
+	case 0:;
+	};
     };
-  };
   /// update extra minor  roots if applicable
 
   qish_dbgprintf ("before calling qish_extra_minor");
@@ -487,36 +500,42 @@ qishgc_minor (int siz)
   qish_dbgprintf ("after calling qish_extra_minor");
 
   /// C++ hook
-  qishcpp_minor();
+  qishcpp_minor ();
 
 #undef MINOR_UPDATE
   /* scan the stored object vector (write barrier) */
   for (storead = ((void **) qishgc_birth.bt_storeptr) - 1;
-       storead < (void **) qishgc_birth.bt_hi; storead++) {
-    void *written = *storead;
-    qish_dbgprintf("minor scan stored storead=%p written=%p", storead, written);
-    if (QISH_IS_MOVING_PTR(written)) {
-      qish_dbgprintf ("old stored object %p in storeptr%p", written,
-		 (void *) storead);
-      qish_minor_scan (written);
-      qish_dbgprintf ("updated stored object %p in storeptr%p",
-		 (void *) (*storead), (void *) storead);
+       storead < (void **) qishgc_birth.bt_hi; storead++)
+    {
+      void *written = *storead;
+      qish_dbgprintf ("minor scan stored storead=%p written=%p", storead,
+		      written);
+      if (QISH_IS_MOVING_PTR (written))
+	{
+	  qish_dbgprintf ("old stored object %p in storeptr%p", written,
+			  (void *) storead);
+	  qish_minor_scan (written);
+	  qish_dbgprintf ("updated stored object %p in storeptr%p",
+			  (void *) (*storead), (void *) storead);
+	}
+      else if (QISH_IS_FIXED_PTR (written))
+	{
+	  qish_dbgprintf ("written fixed object %p", written);
+	  qishgc_minormarkscan (written);
+	}
     }
-    else if (QISH_IS_FIXED_PTR(written)) {
-      qish_dbgprintf("written fixed object %p", written);
-      qishgc_minormarkscan(written);
-    }
-  }
   /* Chesney loop */
-  qish_dbgprintf("minor chesney scanptr=%p", scanptr);
-  while ((qish_uaddr_t) scanptr < (qish_uaddr_t) qishgc_old_cur) {
-    qish_dbgprintf("minor chesney loop scanptr=%p oldcur=%p", scanptr, qishgc_old_cur);
-    scanptr = qish_minor_scan (scanptr);
-    // skip to next non zero word
-    while ((qish_uaddr_t) scanptr < (qish_uaddr_t) qishgc_old_cur
-	   && (*(void **) scanptr) == 0)
-      scanptr = ((void **) scanptr) + 1;
-  };
+  qish_dbgprintf ("minor chesney scanptr=%p", scanptr);
+  while ((qish_uaddr_t) scanptr < (qish_uaddr_t) qishgc_old_cur)
+    {
+      qish_dbgprintf ("minor chesney loop scanptr=%p oldcur=%p", scanptr,
+		      qishgc_old_cur);
+      scanptr = qish_minor_scan (scanptr);
+      // skip to next non zero word
+      while ((qish_uaddr_t) scanptr < (qish_uaddr_t) qishgc_old_cur
+	     && (*(void **) scanptr) == 0)
+	scanptr = ((void **) scanptr) + 1;
+    };
   // allocate the new birth region
   siz += 2 * QISH_PAGESIZE;
   if (siz < MIN_BIRTH_SIZE)
@@ -585,40 +604,44 @@ free_fixed_chunk (struct qishfixedheader_st *phyprev, void *start, int sz)
   int i = 0;
   size_t freesz = 0;
   struct qishfixedheader_st *r = 0;
-  do {
+  do
+    {
 #if 0
-    qish_dbgprintf ("free fixed loop phyprev=%p start=%p->%p sz=%dK", phyprev,
-	       start, start + sz, sz >> 10);
-    qish_dbgprintf ("*start=%x", *(char *) start);
-    qish_dbgprintf ("*end-1=%x", *((((char *) start)) + sz - 1));
+      qish_dbgprintf ("free fixed loop phyprev=%p start=%p->%p sz=%dK",
+		      phyprev, start, start + sz, sz >> 10);
+      qish_dbgprintf ("*start=%x", *(char *) start);
+      qish_dbgprintf ("*end-1=%x", *((((char *) start)) + sz - 1));
 #endif
-    assert ((char *) phyprev < (char *) start);
-    szix = 0;
-    for (i = 1; i < QISHNBFIXEDSIZE; i++)
-      if ((int) qishgc_fixed_sizetab[i] <= sz) {
-	szix = i;
-	freesz = qishgc_fixed_sizetab[i];
-      } else
-	break;
-    //.qish_dbgprintf("szix=%d freesz=%d", szix, freesz);
-    if (sz > (int) sizeof (struct qishfixedheader_st) + 128)
-      memset (start, 0, sizeof (struct qishfixedheader_st) + 128);
-    else
-      memset (start, 0, sz);
-    if (szix <= 0)
-      return;			// no index found - space is lost...
-    r = start;
-    r->kfx_magic = KFX_MAGIC_FREE;
-    r->kfx_sizix = szix;
-    r->kfx_mark = 0;
-    r->kfx_destr = 0;
-    r->kfx_phyprev = phyprev;
-    r->kfx_next = qishgc_free_fixed[szix];
-    qishgc_free_fixed[szix] = r;
-    phyprev = r;
-    start = (char *) r + qishgc_fixed_sizetab[szix];
-    sz -= qishgc_fixed_sizetab[szix];
-  } while (sz > 0);
+      assert ((char *) phyprev < (char *) start);
+      szix = 0;
+      for (i = 1; i < QISHNBFIXEDSIZE; i++)
+	if ((int) qishgc_fixed_sizetab[i] <= sz)
+	  {
+	    szix = i;
+	    freesz = qishgc_fixed_sizetab[i];
+	  }
+	else
+	  break;
+      //.qish_dbgprintf("szix=%d freesz=%d", szix, freesz);
+      if (sz > (int) sizeof (struct qishfixedheader_st) + 128)
+	memset (start, 0, sizeof (struct qishfixedheader_st) + 128);
+      else
+	memset (start, 0, sz);
+      if (szix <= 0)
+	return;			// no index found - space is lost...
+      r = start;
+      r->kfx_magic = KFX_MAGIC_FREE;
+      r->kfx_sizix = szix;
+      r->kfx_mark = 0;
+      r->kfx_destr = 0;
+      r->kfx_phyprev = phyprev;
+      r->kfx_next = qishgc_free_fixed[szix];
+      qishgc_free_fixed[szix] = r;
+      phyprev = r;
+      start = (char *) r + qishgc_fixed_sizetab[szix];
+      sz -= qishgc_fixed_sizetab[szix];
+    }
+  while (sz > 0);
 }				/* end of free_fixed_chunk */
 
 static void
@@ -628,40 +651,44 @@ free_exec_chunk (struct qishfixedheader_st *phyprev, void *start, int sz)
   int i = 0;
   size_t freesz = 0;
   struct qishfixedheader_st *r = 0;
-  do {
+  do
+    {
 #if 0
-    qish_dbgprintf ("free fixed loop phyprev=%p start=%p->%p sz=%dK", phyprev,
-	       start, start + sz, sz >> 10);
-    qish_dbgprintf ("*start=%x", *(char *) start);
-    qish_dbgprintf ("*end-1=%x", *((((char *) start)) + sz - 1));
+      qish_dbgprintf ("free fixed loop phyprev=%p start=%p->%p sz=%dK",
+		      phyprev, start, start + sz, sz >> 10);
+      qish_dbgprintf ("*start=%x", *(char *) start);
+      qish_dbgprintf ("*end-1=%x", *((((char *) start)) + sz - 1));
 #endif
-    assert ((char *) phyprev < (char *) start);
-    szix = 0;
-    for (i = 1; i < QISHNBFIXEDSIZE; i++)
-      if ((int) qishgc_fixed_sizetab[i] <= sz) {
-	szix = i;
-	freesz = qishgc_fixed_sizetab[i];
-      } else
-	break;
-    //.qish_dbgprintf("szix=%d freesz=%d", szix, freesz);
-    if (sz > (int) sizeof (struct qishfixedheader_st) + 128)
-      memset (start, 0, sizeof (struct qishfixedheader_st) + 128);
-    else
-      memset (start, 0, sz);
-    if (szix <= 0)
-      return;			// no index found - space is lost...
-    r = start;
-    r->kfx_magic = KFX_MAGIC_FREE;
-    r->kfx_sizix = szix;
-    r->kfx_mark = 0;
-    r->kfx_destr = 0;
-    r->kfx_phyprev = phyprev;
-    r->kfx_next = qishgc_free_exfix[szix];
-    qishgc_free_fixed[szix] = r;
-    phyprev = r;
-    start = (char *) r + qishgc_fixed_sizetab[szix];
-    sz -= qishgc_fixed_sizetab[szix];
-  } while (sz > 0);
+      assert ((char *) phyprev < (char *) start);
+      szix = 0;
+      for (i = 1; i < QISHNBFIXEDSIZE; i++)
+	if ((int) qishgc_fixed_sizetab[i] <= sz)
+	  {
+	    szix = i;
+	    freesz = qishgc_fixed_sizetab[i];
+	  }
+	else
+	  break;
+      //.qish_dbgprintf("szix=%d freesz=%d", szix, freesz);
+      if (sz > (int) sizeof (struct qishfixedheader_st) + 128)
+	memset (start, 0, sizeof (struct qishfixedheader_st) + 128);
+      else
+	memset (start, 0, sz);
+      if (szix <= 0)
+	return;			// no index found - space is lost...
+      r = start;
+      r->kfx_magic = KFX_MAGIC_FREE;
+      r->kfx_sizix = szix;
+      r->kfx_mark = 0;
+      r->kfx_destr = 0;
+      r->kfx_phyprev = phyprev;
+      r->kfx_next = qishgc_free_exfix[szix];
+      qishgc_free_fixed[szix] = r;
+      phyprev = r;
+      start = (char *) r + qishgc_fixed_sizetab[szix];
+      sz -= qishgc_fixed_sizetab[szix];
+    }
+  while (sz > 0);
 }				/* end of free_exec_chunk */
 
 
@@ -677,17 +704,18 @@ get_fixed_chunk (int sizix)
   void *ad = 0;
   assert (sizix > 0 && sizix < QISHNBFIXEDSIZE);
   for (ix = sizix + 1; ix < QISHNBFIXEDSIZE; ix++)
-    if ((r = qishgc_free_fixed[ix]) != 0) {
-      assert (r->kfx_magic == KFX_MAGIC_FREE);
-      qishgc_free_fixed[ix] = r->kfx_next;
-      r->kfx_next = qishgc_free_fixed[sizix];
-      r->kfx_sizix = sizix;
-      r->kfx_magic = KFX_MAGIC_USED;
-      free_fixed_chunk (r, (char *) r + qishgc_fixed_sizetab[sizix],
-			qishgc_fixed_sizetab[ix] -
-			qishgc_fixed_sizetab[sizix]);
-      return r;
-    };
+    if ((r = qishgc_free_fixed[ix]) != 0)
+      {
+	assert (r->kfx_magic == KFX_MAGIC_FREE);
+	qishgc_free_fixed[ix] = r->kfx_next;
+	r->kfx_next = qishgc_free_fixed[sizix];
+	r->kfx_sizix = sizix;
+	r->kfx_magic = KFX_MAGIC_USED;
+	free_fixed_chunk (r, (char *) r + qishgc_fixed_sizetab[sizix],
+			  qishgc_fixed_sizetab[ix] -
+			  qishgc_fixed_sizetab[sizix]);
+	return r;
+      };
   /* no bigger chunk found, allocate one... */
   allocsz = 15 * QISH_PAGESIZE + qishgc_fixed_sizetab[sizix];
   allocsz |= (QISH_PAGESIZE - 1);
@@ -696,16 +724,16 @@ get_fixed_chunk (int sizix)
   if ((char *) qishgc_fixed_hi + allocsz >
       (char *) qishgc_fixed_lo + FIXEDHEAP_MAXLEN)
     qish_panic ("overflowing memory for fixed objects (%dKb requested)\n",
-		(int)(allocsz >> 10));
+		(int) (allocsz >> 10));
   ad =
     mmap (qishgc_fixed_hi, (size_t) allocsz,
 	  PROT_READ | PROT_WRITE | PROT_EXEC,
 	  MAP_ANON | MAP_FIXED | MAP_PRIVATE, -1, 0);
   if (ad == MAP_FAILED)
     qish_epanic ("cannot allocate memory for fixed objects (%dKb requested)",
-		 (int)(allocsz >> 10));
+		 (int) (allocsz >> 10));
   qish_dbgprintf ("mmap fixed %p-%p %dK", qishgc_fixed_hi,
-	     (char *) qishgc_fixed_hi + allocsz, (int)(allocsz >> 10));
+		  (char *) qishgc_fixed_hi + allocsz, (int) (allocsz >> 10));
   //.qish_dbgprintf("mmaped ad=%p", ad);
   r = ad;
   r->kfx_magic = KFX_MAGIC_USED;
@@ -734,17 +762,18 @@ get_exec_chunk (int sizix)
   void *ad = 0;
   assert (sizix > 0 && sizix < QISHNBFIXEDSIZE);
   for (ix = sizix + 1; ix < QISHNBFIXEDSIZE; ix++)
-    if ((r = qishgc_free_exfix[ix]) != 0) {
-      assert (r->kfx_magic == KFX_MAGIC_FREE);
-      qishgc_free_fixed[ix] = r->kfx_next;
-      r->kfx_next = qishgc_free_exfix[sizix];
-      r->kfx_sizix = sizix;
-      r->kfx_magic = KFX_MAGIC_EXEC;
-      free_exec_chunk (r, (char *) r + qishgc_fixed_sizetab[sizix],
-		       qishgc_fixed_sizetab[ix] -
-		       qishgc_fixed_sizetab[sizix]);
-      return r;
-    };
+    if ((r = qishgc_free_exfix[ix]) != 0)
+      {
+	assert (r->kfx_magic == KFX_MAGIC_FREE);
+	qishgc_free_fixed[ix] = r->kfx_next;
+	r->kfx_next = qishgc_free_exfix[sizix];
+	r->kfx_sizix = sizix;
+	r->kfx_magic = KFX_MAGIC_EXEC;
+	free_exec_chunk (r, (char *) r + qishgc_fixed_sizetab[sizix],
+			 qishgc_fixed_sizetab[ix] -
+			 qishgc_fixed_sizetab[sizix]);
+	return r;
+      };
   /* no bigger chunk found, allocate one... */
   allocsz = 15 * QISH_PAGESIZE + qishgc_fixed_sizetab[sizix];
   allocsz |= (QISH_PAGESIZE - 1);
@@ -753,10 +782,10 @@ get_exec_chunk (int sizix)
   if ((char *) qishgc_fixed_hi + allocsz >
       (char *) qishgc_fixed_lo + FIXEDHEAP_MAXLEN)
     qish_panic ("overflowing memory for execfixed objects (%dKb requested)\n",
-		(int)(allocsz >> 10));
+		(int) (allocsz >> 10));
   ad = qishgc_getexecmem ("exec fixed alloc", allocsz);
   qish_dbgprintf ("mmap fixed %p-%p %dK", qishgc_fixed_hi,
-	     (char *) qishgc_fixed_hi + allocsz, (int)(allocsz >> 10));
+		  (char *) qishgc_fixed_hi + allocsz, (int) (allocsz >> 10));
   //.qish_dbgprintf("mmaped ad=%p", ad);
   r = ad;
   r->kfx_magic = KFX_MAGIC_EXEC;
@@ -780,46 +809,52 @@ qish_fixed_alloc (size_t sz, void (*destr) (void *))
   int szix = 0;
   int i = 0;
   struct qishfixedheader_st *r = 0;
-  if (rawsz <= 2 << 7) {
-    if (rawsz <= 2 << 4)
-      szix = 1;
-    else if (rawsz <= 2 << 5)
-      szix = 2;
-    else if (rawsz <= 3 << 5)
-      szix = 3;
-    else if (rawsz <= 2 << 6)
-      szix = 4;
-    else if (rawsz <= 3 << 6)
-      szix = 5;
-    else if (rawsz <= 2 << 7)
-      szix = 6;
-  } else
+  if (rawsz <= 2 << 7)
+    {
+      if (rawsz <= 2 << 4)
+	szix = 1;
+      else if (rawsz <= 2 << 5)
+	szix = 2;
+      else if (rawsz <= 3 << 5)
+	szix = 3;
+      else if (rawsz <= 2 << 6)
+	szix = 4;
+      else if (rawsz <= 3 << 6)
+	szix = 5;
+      else if (rawsz <= 2 << 7)
+	szix = 6;
+    }
+  else
     for (i = 5; i < QISHNBFIXEDSIZE; i++)
-      if (rawsz <= qishgc_fixed_sizetab[i]) {
-	szix = i;
-	break;
-      };
-  if ((r = qishgc_free_fixed[szix]) != 0) {
-    /* reserve the r and unlink it from the free list */
-    assert (r->kfx_magic == KFX_MAGIC_FREE);
-    assert (r->kfx_sizix == szix);
-    qishgc_free_fixed[szix] = r->kfx_next;
-    r->kfx_mark = 1;
-    r->kfx_magic = KFX_MAGIC_USED;
-    r->kfx_destr = destr;
-    r->kfx_next = qishgc_used_fixed[szix];
-    qishgc_used_fixed[szix] = r;
-    memset (r->kfx_data, 0, rawsz - sizeof (struct qishfixedheader_st));
-    return r->kfx_data;
-  } else {
-    /* should make a free chunk of size index szix */
-    r = get_fixed_chunk (szix);
-    r->kfx_mark = 1;
-    r->kfx_magic = KFX_MAGIC_USED;
-    r->kfx_destr = destr;
-    qishgc_used_fixed[szix] = r;
-    return r->kfx_data;
-  };
+      if (rawsz <= qishgc_fixed_sizetab[i])
+	{
+	  szix = i;
+	  break;
+	};
+  if ((r = qishgc_free_fixed[szix]) != 0)
+    {
+      /* reserve the r and unlink it from the free list */
+      assert (r->kfx_magic == KFX_MAGIC_FREE);
+      assert (r->kfx_sizix == szix);
+      qishgc_free_fixed[szix] = r->kfx_next;
+      r->kfx_mark = 1;
+      r->kfx_magic = KFX_MAGIC_USED;
+      r->kfx_destr = destr;
+      r->kfx_next = qishgc_used_fixed[szix];
+      qishgc_used_fixed[szix] = r;
+      memset (r->kfx_data, 0, rawsz - sizeof (struct qishfixedheader_st));
+      return r->kfx_data;
+    }
+  else
+    {
+      /* should make a free chunk of size index szix */
+      r = get_fixed_chunk (szix);
+      r->kfx_mark = 1;
+      r->kfx_magic = KFX_MAGIC_USED;
+      r->kfx_destr = destr;
+      qishgc_used_fixed[szix] = r;
+      return r->kfx_data;
+    };
 }				/* end of qish_fixed_alloc */
 
 
@@ -831,46 +866,52 @@ qish_fixed_exec_alloc (size_t sz, void (*destr) (void *))
   int szix = 0;
   int i = 0;
   struct qishfixedheader_st *r = 0;
-  if (rawsz <= 2 << 7) {
-    if (rawsz <= 2 << 4)
-      szix = 1;
-    else if (rawsz <= 2 << 5)
-      szix = 2;
-    else if (rawsz <= 3 << 5)
-      szix = 3;
-    else if (rawsz <= 2 << 6)
-      szix = 4;
-    else if (rawsz <= 3 << 6)
-      szix = 5;
-    else if (rawsz <= 2 << 7)
-      szix = 6;
-  } else
+  if (rawsz <= 2 << 7)
+    {
+      if (rawsz <= 2 << 4)
+	szix = 1;
+      else if (rawsz <= 2 << 5)
+	szix = 2;
+      else if (rawsz <= 3 << 5)
+	szix = 3;
+      else if (rawsz <= 2 << 6)
+	szix = 4;
+      else if (rawsz <= 3 << 6)
+	szix = 5;
+      else if (rawsz <= 2 << 7)
+	szix = 6;
+    }
+  else
     for (i = 5; i < QISHNBFIXEDSIZE; i++)
-      if (rawsz <= qishgc_fixed_sizetab[i]) {
-	szix = i;
-	break;
-      };
-  if ((r = qishgc_free_exfix[szix]) != 0) {
-    /* reserve the r and unlink it from the free list */
-    assert (r->kfx_magic == KFX_MAGIC_FREE);
-    assert (r->kfx_sizix == szix);
-    qishgc_free_fixed[szix] = r->kfx_next;
-    r->kfx_mark = 1;
-    r->kfx_magic = KFX_MAGIC_EXEC;
-    r->kfx_destr = destr;
-    r->kfx_next = qishgc_used_exfix[szix];
-    qishgc_used_exfix[szix] = r;
-    memset (r->kfx_data, 0, rawsz - sizeof (struct qishfixedheader_st));
-    return r->kfx_data;
-  } else {
-    /* should make a free chunk of size index szix */
-    r = get_exec_chunk (szix);
-    r->kfx_mark = 1;
-    r->kfx_magic = KFX_MAGIC_EXEC;
-    r->kfx_destr = destr;
-    qishgc_used_exfix[szix] = r;
-    return r->kfx_data;
-  };
+      if (rawsz <= qishgc_fixed_sizetab[i])
+	{
+	  szix = i;
+	  break;
+	};
+  if ((r = qishgc_free_exfix[szix]) != 0)
+    {
+      /* reserve the r and unlink it from the free list */
+      assert (r->kfx_magic == KFX_MAGIC_FREE);
+      assert (r->kfx_sizix == szix);
+      qishgc_free_fixed[szix] = r->kfx_next;
+      r->kfx_mark = 1;
+      r->kfx_magic = KFX_MAGIC_EXEC;
+      r->kfx_destr = destr;
+      r->kfx_next = qishgc_used_exfix[szix];
+      qishgc_used_exfix[szix] = r;
+      memset (r->kfx_data, 0, rawsz - sizeof (struct qishfixedheader_st));
+      return r->kfx_data;
+    }
+  else
+    {
+      /* should make a free chunk of size index szix */
+      r = get_exec_chunk (szix);
+      r->kfx_mark = 1;
+      r->kfx_magic = KFX_MAGIC_EXEC;
+      r->kfx_destr = destr;
+      qishgc_used_exfix[szix] = r;
+      return r->kfx_data;
+    };
 }				/* end of qish_fixed_exec_alloc */
 
 static void
@@ -878,22 +919,25 @@ clear_all_fixed_marks (void)
 {
   struct qishfixedheader_st *hd = 0;
   int szix = 0;
-  for (szix = 1; szix < QISHNBFIXEDSIZE; szix++) {
-    for (hd = qishgc_used_fixed[szix]; hd; hd = hd->kfx_next) {
-      assert (hd->kfx_magic == KFX_MAGIC_USED
-	      || hd->kfx_magic == KFX_MAGIC_EXEC);
-      assert (hd->kfx_sizix == szix);
-      //.qish_dbgprintf("clear mark hd=%p data %p szix=%d", hd, hd->kfx_data, szix);
-      hd->kfx_mark = 0;
+  for (szix = 1; szix < QISHNBFIXEDSIZE; szix++)
+    {
+      for (hd = qishgc_used_fixed[szix]; hd; hd = hd->kfx_next)
+	{
+	  assert (hd->kfx_magic == KFX_MAGIC_USED
+		  || hd->kfx_magic == KFX_MAGIC_EXEC);
+	  assert (hd->kfx_sizix == szix);
+	  //.qish_dbgprintf("clear mark hd=%p data %p szix=%d", hd, hd->kfx_data, szix);
+	  hd->kfx_mark = 0;
+	};
+      for (hd = qishgc_used_exfix[szix]; hd; hd = hd->kfx_next)
+	{
+	  assert (hd->kfx_magic == KFX_MAGIC_USED
+		  || hd->kfx_magic == KFX_MAGIC_EXEC);
+	  assert (hd->kfx_sizix == szix);
+	  //.qish_dbgprintf("clear mark hd=%p data %p szix=%d", hd, hd->kfx_data, szix);
+	  hd->kfx_mark = 0;
+	};
     };
-    for (hd = qishgc_used_exfix[szix]; hd; hd = hd->kfx_next) {
-      assert (hd->kfx_magic == KFX_MAGIC_USED
-	      || hd->kfx_magic == KFX_MAGIC_EXEC);
-      assert (hd->kfx_sizix == szix);
-      //.qish_dbgprintf("clear mark hd=%p data %p szix=%d", hd, hd->kfx_data, szix);
-      hd->kfx_mark = 0;
-    };
-  };
 }				// end of clear_all_fixed_marks
 
 static void
@@ -904,24 +948,30 @@ destroy_unmarked_fixed (void)
   struct qishfixedheader_st **prevptr = 0;
   int szix = 0;
   void (*destr) (void *);
-  for (szix = 1; szix < QISHNBFIXEDSIZE; szix++) {
-    prevptr = qishgc_used_fixed + szix;
-    for (hd = qishgc_used_fixed[szix]; hd; hd = nexthd) {
-      assert (hd->kfx_magic == KFX_MAGIC_USED);
-      nexthd = hd->kfx_next;
-      if (!hd->kfx_mark) {
-	//.qish_dbgprintf("destroy unmarked hd=%p data=%p", hd, hd->kfx_data);
-	if ((destr = hd->kfx_destr) != 0) {
-	  hd->kfx_destr = 0;
-	  (*destr) ((void *) (hd->kfx_data));
-	  memset (hd + 1, 0, qishgc_fixed_sizetab[szix] - sizeof (*hd));
+  for (szix = 1; szix < QISHNBFIXEDSIZE; szix++)
+    {
+      prevptr = qishgc_used_fixed + szix;
+      for (hd = qishgc_used_fixed[szix]; hd; hd = nexthd)
+	{
+	  assert (hd->kfx_magic == KFX_MAGIC_USED);
+	  nexthd = hd->kfx_next;
+	  if (!hd->kfx_mark)
+	    {
+	      //.qish_dbgprintf("destroy unmarked hd=%p data=%p", hd, hd->kfx_data);
+	      if ((destr = hd->kfx_destr) != 0)
+		{
+		  hd->kfx_destr = 0;
+		  (*destr) ((void *) (hd->kfx_data));
+		  memset (hd + 1, 0,
+			  qishgc_fixed_sizetab[szix] - sizeof (*hd));
+		};
+	      free_fixed_chunk (hd->kfx_phyprev, hd,
+				qishgc_fixed_sizetab[szix]);
+	    };
+	  *prevptr = nexthd;
+	  prevptr = &hd->kfx_next;
 	};
-	free_fixed_chunk (hd->kfx_phyprev, hd, qishgc_fixed_sizetab[szix]);
-      };
-      *prevptr = nexthd;
-      prevptr = &hd->kfx_next;
-    };
-  }
+    }
 }				// end of destroy_unmarked_fixed
 
 static void
@@ -932,35 +982,43 @@ destroy_unmarked_execfix (void)
   struct qishfixedheader_st **prevptr = 0;
   int szix = 0;
   void (*destr) (void *);
-  for (szix = 1; szix < QISHNBFIXEDSIZE; szix++) {
-    prevptr = qishgc_used_exfix + szix;
-    for (hd = qishgc_used_exfix[szix]; hd; hd = nexthd) {
-      assert (hd->kfx_magic == KFX_MAGIC_EXEC);
-      nexthd = hd->kfx_next;
-      if (!hd->kfx_mark) {
-	//.qish_dbgprintf("destroy unmarked hd=%p data=%p", hd, hd->kfx_data);
-	if ((destr = hd->kfx_destr) != 0) {
-	  hd->kfx_destr = 0;
-	  (*destr) ((void *) (hd->kfx_data));
-	  memset (hd + 1, 0, qishgc_fixed_sizetab[szix] - sizeof (*hd));
+  for (szix = 1; szix < QISHNBFIXEDSIZE; szix++)
+    {
+      prevptr = qishgc_used_exfix + szix;
+      for (hd = qishgc_used_exfix[szix]; hd; hd = nexthd)
+	{
+	  assert (hd->kfx_magic == KFX_MAGIC_EXEC);
+	  nexthd = hd->kfx_next;
+	  if (!hd->kfx_mark)
+	    {
+	      //.qish_dbgprintf("destroy unmarked hd=%p data=%p", hd, hd->kfx_data);
+	      if ((destr = hd->kfx_destr) != 0)
+		{
+		  hd->kfx_destr = 0;
+		  (*destr) ((void *) (hd->kfx_data));
+		  memset (hd + 1, 0,
+			  qishgc_fixed_sizetab[szix] - sizeof (*hd));
+		};
+	      free_exec_chunk (hd->kfx_phyprev, hd,
+			       qishgc_fixed_sizetab[szix]);
+	    };
+	  *prevptr = nexthd;
+	  prevptr = &hd->kfx_next;
 	};
-	free_exec_chunk (hd->kfx_phyprev, hd, qishgc_fixed_sizetab[szix]);
-      };
-      *prevptr = nexthd;
-      prevptr = &hd->kfx_next;
-    };
-  }
+    }
 }				// end of destroy_unmarked_execfix
 
-void qish_fixed_forget(void* ob) {
+void
+qish_fixed_forget (void *ob)
+{
   struct qishfixedheader_st *hd = 0;
-  int sz=0;
+  int sz = 0;
   assert (ob != 0 && ob >= qishgc_fixed_lo && ob <= qishgc_fixed_hi);
   hd = (struct qishfixedheader_st *) ob - 1;
   sz = qishgc_fixed_sizetab[hd->kfx_sizix];
-  memset(ob, 0, sz);
-  hd->kfx_destr = (qish_voidfun_t*)-1;
-} /* end of qish_fixed_forget */
+  memset (ob, 0, sz);
+  hd->kfx_destr = (qish_voidfun_t *) - 1;
+}				/* end of qish_fixed_forget */
 
 void
 qishgc_minormark (void *ob)
@@ -1017,103 +1075,107 @@ qishgc_full_stackscan (void)
   struct qishgc_framedescr_st *fram = 0;
   //.qish_dbgprintf("scanptr=%p oldcur=%p after %d constants", scanptr, qishgc_old_cur, n);
   for (fram = (struct qishgc_framedescr_st *) qishgc_birth.bt_qishgcf; fram;
-       fram = (struct qishgc_framedescr_st *) (fram->gcf_prev)) {
-    int i;
-    int nbparams = fram->gcf_point->gcd_nbparam;
-    int nblocals = fram->gcf_point->gcd_nblocal;
-    void **args = fram->gcf_args;
-    void **locals = fram->gcf_locals;
-    //.qish_dbgprintf("fram=%p nbparams=%d args=%p nblocals=%d locals=%p", fram, nbparams, args, nblocals, locals);
+       fram = (struct qishgc_framedescr_st *) (fram->gcf_prev))
+    {
+      int i;
+      int nbparams = fram->gcf_point->gcd_nbparam;
+      int nblocals = fram->gcf_point->gcd_nblocal;
+      void **args = fram->gcf_args;
+      void **locals = fram->gcf_locals;
+      //.qish_dbgprintf("fram=%p nbparams=%d args=%p nblocals=%d locals=%p", fram, nbparams, args, nblocals, locals);
 #if QISH_ARGS_UP
-    /* actual arguments have increasing adresses from args; optimize
-       for few arguments */
-    switch (nbparams) {
-    default:
-      for (i = nbparams - 1; i >= 7; i--)
-	QISHGC_FULL_UPDATE (args[i]);
-    case 7:
-      QISHGC_FULL_UPDATE (args[6]);	/*fallthru */
-    case 6:
-      QISHGC_FULL_UPDATE (args[5]);	/*fallthru */
-    case 5:
-      QISHGC_FULL_UPDATE (args[4]);	/*fallthru */
-    case 4:
-      QISHGC_FULL_UPDATE (args[3]);	/*fallthru */
-    case 3:
-      QISHGC_FULL_UPDATE (args[2]);	/*fallthru */
-    case 2:
-      QISHGC_FULL_UPDATE (args[1]);	/*fallthru */
-    case 1:
-      QISHGC_FULL_UPDATE (args[0]);	/*fallthru */
-    case 0:
-      break;
-    };
+      /* actual arguments have increasing adresses from args; optimize
+         for few arguments */
+      switch (nbparams)
+	{
+	default:
+	  for (i = nbparams - 1; i >= 7; i--)
+	    QISHGC_FULL_UPDATE (args[i]);
+	case 7:
+	  QISHGC_FULL_UPDATE (args[6]);	/*fallthru */
+	case 6:
+	  QISHGC_FULL_UPDATE (args[5]);	/*fallthru */
+	case 5:
+	  QISHGC_FULL_UPDATE (args[4]);	/*fallthru */
+	case 4:
+	  QISHGC_FULL_UPDATE (args[3]);	/*fallthru */
+	case 3:
+	  QISHGC_FULL_UPDATE (args[2]);	/*fallthru */
+	case 2:
+	  QISHGC_FULL_UPDATE (args[1]);	/*fallthru */
+	case 1:
+	  QISHGC_FULL_UPDATE (args[0]);	/*fallthru */
+	case 0:
+	  break;
+	};
 #endif //QISH_ARGS_UP
-    ///////
+      ///////
 #if QISH_ARGS_DOWN
-    /* actual arguments have decreasing adresses from args; optimize
-       for few arguments */
-    switch (nbparams) {
-    default:
-      for (i = nbparams - 1; i >= 7; i--)
-	QISHGC_FULL_UPDATE (args[-i]);
-    case 7:
-      QISHGC_FULL_UPDATE (args[-6]);	/*fallthru */
-    case 6:
-      QISHGC_FULL_UPDATE (args[-5]);	/*fallthru */
-    case 5:
-      QISHGC_FULL_UPDATE (args[-4]);	/*fallthru */
-    case 4:
-      QISHGC_FULL_UPDATE (args[-3]);	/*fallthru */
-    case 3:
-      QISHGC_FULL_UPDATE (args[-2]);	/*fallthru */
-    case 2:
-      QISHGC_FULL_UPDATE (args[-1]);	/*fallthru */
-    case 1:
-      QISHGC_FULL_UPDATE (args[0]);	/*fallthru */
-    case 0:;
-    };
+      /* actual arguments have decreasing adresses from args; optimize
+         for few arguments */
+      switch (nbparams)
+	{
+	default:
+	  for (i = nbparams - 1; i >= 7; i--)
+	    QISHGC_FULL_UPDATE (args[-i]);
+	case 7:
+	  QISHGC_FULL_UPDATE (args[-6]);	/*fallthru */
+	case 6:
+	  QISHGC_FULL_UPDATE (args[-5]);	/*fallthru */
+	case 5:
+	  QISHGC_FULL_UPDATE (args[-4]);	/*fallthru */
+	case 4:
+	  QISHGC_FULL_UPDATE (args[-3]);	/*fallthru */
+	case 3:
+	  QISHGC_FULL_UPDATE (args[-2]);	/*fallthru */
+	case 2:
+	  QISHGC_FULL_UPDATE (args[-1]);	/*fallthru */
+	case 1:
+	  QISHGC_FULL_UPDATE (args[0]);	/*fallthru */
+	case 0:;
+	};
 #endif //QISH_ARGS_DOWN
-    /* optimize for few locals */
-    switch (nblocals) {
-    default:
-      for (i = nblocals - 1; i >= 16; i--)
-	QISHGC_FULL_UPDATE (locals[i]);
-    case 16:
-      QISHGC_FULL_UPDATE (locals[15]);	/*fallthru */
-    case 15:
-      QISHGC_FULL_UPDATE (locals[14]);	/*fallthru */
-    case 14:
-      QISHGC_FULL_UPDATE (locals[13]);	/*fallthru */
-    case 13:
-      QISHGC_FULL_UPDATE (locals[12]);	/*fallthru */
-    case 12:
-      QISHGC_FULL_UPDATE (locals[11]);	/*fallthru */
-    case 11:
-      QISHGC_FULL_UPDATE (locals[10]);	/*fallthru */
-    case 10:
-      QISHGC_FULL_UPDATE (locals[9]);	/*fallthru */
-    case 9:
-      QISHGC_FULL_UPDATE (locals[8]);	/*fallthru */
-    case 8:
-      QISHGC_FULL_UPDATE (locals[7]);	/*fallthru */
-    case 7:
-      QISHGC_FULL_UPDATE (locals[6]);	/*fallthru */
-    case 6:
-      QISHGC_FULL_UPDATE (locals[5]);	/*fallthru */
-    case 5:
-      QISHGC_FULL_UPDATE (locals[4]);	/*fallthru */
-    case 4:
-      QISHGC_FULL_UPDATE (locals[3]);	/*fallthru */
-    case 3:
-      QISHGC_FULL_UPDATE (locals[2]);	/*fallthru */
-    case 2:
-      QISHGC_FULL_UPDATE (locals[1]);	/*fallthru */
-    case 1:
-      QISHGC_FULL_UPDATE (locals[0]);	/*fallthru */
-    case 0:;
-    };
-  }				// end for fram;
+      /* optimize for few locals */
+      switch (nblocals)
+	{
+	default:
+	  for (i = nblocals - 1; i >= 16; i--)
+	    QISHGC_FULL_UPDATE (locals[i]);
+	case 16:
+	  QISHGC_FULL_UPDATE (locals[15]);	/*fallthru */
+	case 15:
+	  QISHGC_FULL_UPDATE (locals[14]);	/*fallthru */
+	case 14:
+	  QISHGC_FULL_UPDATE (locals[13]);	/*fallthru */
+	case 13:
+	  QISHGC_FULL_UPDATE (locals[12]);	/*fallthru */
+	case 12:
+	  QISHGC_FULL_UPDATE (locals[11]);	/*fallthru */
+	case 11:
+	  QISHGC_FULL_UPDATE (locals[10]);	/*fallthru */
+	case 10:
+	  QISHGC_FULL_UPDATE (locals[9]);	/*fallthru */
+	case 9:
+	  QISHGC_FULL_UPDATE (locals[8]);	/*fallthru */
+	case 8:
+	  QISHGC_FULL_UPDATE (locals[7]);	/*fallthru */
+	case 7:
+	  QISHGC_FULL_UPDATE (locals[6]);	/*fallthru */
+	case 6:
+	  QISHGC_FULL_UPDATE (locals[5]);	/*fallthru */
+	case 5:
+	  QISHGC_FULL_UPDATE (locals[4]);	/*fallthru */
+	case 4:
+	  QISHGC_FULL_UPDATE (locals[3]);	/*fallthru */
+	case 3:
+	  QISHGC_FULL_UPDATE (locals[2]);	/*fallthru */
+	case 2:
+	  QISHGC_FULL_UPDATE (locals[1]);	/*fallthru */
+	case 1:
+	  QISHGC_FULL_UPDATE (locals[0]);	/*fallthru */
+	case 0:;
+	};
+    }				// end for fram;
   /// update extra full  roots if applicable
   qish_dbgprintf ("before calling qish_extra_full_p");
   qish_extra_full ();
@@ -1126,7 +1188,7 @@ qishgc_full_stackscan (void)
  * major (or full) garbage collection, with some preforwarding
  **************************************************************/
 static void
-qishgc_full (int siz, int nbforw, void**oldforw, void**newforw)
+qishgc_full (int siz, int nbforw, void **oldforw, void **newforw)
 {
   int n = 0;
   void *prevoldlo = qishgc_old_lo;
@@ -1164,14 +1226,16 @@ qishgc_full (int siz, int nbforw, void**oldforw, void**newforw)
   newold = qishgc_getmem ("new old region", newoldsiz);
   qishgc_old_cur = scanptr = (char *) newold + 32 * sizeof (void *);
   /// preforwarding
-  for (n = 0; n<nbforw; n++) {
-    if (newforw[n]) 
-      QISHGC_FULL_PTR_UPDATE(newforw[n]);;
-    if (QISH_IS_MOVING_PTR(oldforw[n])) {
-      ((void**)(oldforw[n]))[0] = 0;
-      ((void**)(oldforw[n]))[1] = newforw[n];
-    }
-  };
+  for (n = 0; n < nbforw; n++)
+    {
+      if (newforw[n])
+	QISHGC_FULL_PTR_UPDATE (newforw[n]);;
+      if (QISH_IS_MOVING_PTR (oldforw[n]))
+	{
+	  ((void **) (oldforw[n]))[0] = 0;
+	  ((void **) (oldforw[n]))[1] = newforw[n];
+	}
+    };
   ////
   for (n = 0; n < QISH_NB_ROOTS; n++)
     QISHGC_FULL_UPDATE (((void **) qish_roots)[n]);
@@ -1184,19 +1248,20 @@ qishgc_full (int siz, int nbforw, void**oldforw, void**newforw)
   qishgc_changedconstrank = 0;
   qishgc_full_stackscan ();
   /// C++ hook
-  qishcpp_full();
+  qishcpp_full ();
   /* Chesney loop */
-  while ((qish_uaddr_t) scanptr < (qish_uaddr_t) qishgc_old_cur) {
-    void *scanob = scanptr;
-    scanptr = qish_full_scan (scanob);
-    qish_dbgprintf("scanob=%p scanptr=%p", scanob, scanptr);
-    assert (scanptr != 0 && scanob != 0);
-    assert ((((qish_uaddr_t) scanptr) % sizeof (void *)) == 0);
-    // skip to next non zero word
-    while ((qish_uaddr_t) scanptr < (qish_uaddr_t) qishgc_old_cur
-	   && (*(void **) scanptr) == 0)
-      scanptr = ((void **) scanptr) + 1;
-  };
+  while ((qish_uaddr_t) scanptr < (qish_uaddr_t) qishgc_old_cur)
+    {
+      void *scanob = scanptr;
+      scanptr = qish_full_scan (scanob);
+      qish_dbgprintf ("scanob=%p scanptr=%p", scanob, scanptr);
+      assert (scanptr != 0 && scanob != 0);
+      assert ((((qish_uaddr_t) scanptr) % sizeof (void *)) == 0);
+      // skip to next non zero word
+      while ((qish_uaddr_t) scanptr < (qish_uaddr_t) qishgc_old_cur
+	     && (*(void **) scanptr) == 0)
+	scanptr = ((void **) scanptr) + 1;
+    };
   destroy_unmarked_fixed ();
   destroy_unmarked_execfix ();
   qishgc_releasemem ("previous old region (full GC)", prevoldlo,
@@ -1225,17 +1290,19 @@ qishgc_full (int siz, int nbforw, void**oldforw, void**newforw)
   qish_dbgprintf ("oldsiz= %dK newoldsiz %dK newold=%p", oldsiz >> 10,
 		  newoldsiz >> 10, newold);
   assert (oldsiz <= newoldsiz);
-  if (oldsiz < newoldsiz) {
-    qish_dbgprintf ("oldsiz=%dK newoldsiz=%dK unmapping %p-%p", oldsiz << 10,
-		    newoldsiz << 10, (char *) newold + oldsiz,
-		    (char *) newold + newoldsiz);
-    if (munmap ((char *) newold + oldsiz, newoldsiz - oldsiz))
-      qish_epanic ("cannot unmap excess %dKbytes of old region",
-		   (newoldsiz - oldsiz) >> 10);
-    qishgc_old_hi = (char *) qishgc_old_lo + oldsiz;
-    qish_dbgprintf ("munmap excess old %p-%p %dK", (char *) newold + oldsiz,
-		    (char *) newold + newoldsiz, (newoldsiz - oldsiz) >> 10);
-  };
+  if (oldsiz < newoldsiz)
+    {
+      qish_dbgprintf ("oldsiz=%dK newoldsiz=%dK unmapping %p-%p",
+		      oldsiz << 10, newoldsiz << 10, (char *) newold + oldsiz,
+		      (char *) newold + newoldsiz);
+      if (munmap ((char *) newold + oldsiz, newoldsiz - oldsiz))
+	qish_epanic ("cannot unmap excess %dKbytes of old region",
+		     (newoldsiz - oldsiz) >> 10);
+      qishgc_old_hi = (char *) qishgc_old_lo + oldsiz;
+      qish_dbgprintf ("munmap excess old %p-%p %dK", (char *) newold + oldsiz,
+		      (char *) newold + newoldsiz,
+		      (newoldsiz - oldsiz) >> 10);
+    };
   qishgc_old_lo = newold;
   qishgc_old_hi = (char *) newold + oldsiz;
   qish_dbgprintf ("after fullgc old=%p-%p %dK", (char *) qishgc_old_lo,
@@ -1256,8 +1323,8 @@ qish_garbagecollect (int size, int needfull)
   if (qish_debug)
     putchar ('\n');
   qish_dbgprintf ("begin %d GC ***** [old=%p-%p] [birth=%p-%p]", gc_count,
-	     qishgc_old_lo, qishgc_old_hi, qishgc_birth.bt_lo,
-	     qishgc_birth.bt_hi);
+		  qishgc_old_lo, qishgc_old_hi, qishgc_birth.bt_lo,
+		  qishgc_birth.bt_hi);
 #endif
 
 #ifndef QISH_ROUTINE
@@ -1301,26 +1368,29 @@ qish_garbagecollect (int size, int needfull)
 	  (qish_uaddr_t) qishgc_birth.bt_hi);
   qishgc_birth.bt_in_gc = 0;
   qish_dbgprintf ("end %d GC [%s] old=%p-%p birth=%p-%p *****", gc_count,
-	     needfull ? "full" : "minor", qishgc_old_lo, qishgc_old_hi,
-	     qishgc_birth.bt_lo, qishgc_birth.bt_hi);
+		  needfull ? "full" : "minor", qishgc_old_lo, qishgc_old_hi,
+		  qishgc_birth.bt_lo, qishgc_birth.bt_hi);
 }				// end of qish_garbagecollect
 
 
 
-void qish_preforward_garbagecollect(int nbforw, void*oldforw[], void*newforw[]) {
+void
+qish_preforward_garbagecollect (int nbforw, void *oldforw[], void *newforw[])
+{
   int i;
-  if (nbforw<=0) 
+  if (nbforw <= 0)
     return;
-  assert(oldforw != 0);
-  assert(newforw != 0);
-  for (i=0; i<nbforw; i++) {
-    if (newforw[i] && !QISH_IS_MOVING_PTR(newforw[i])) 
-      qish_panic("invalid new forward #%d = %p", i, newforw[i]);
-    if (oldforw[i] && !QISH_IS_MOVING_PTR(oldforw[i])) 
-      qish_panic("invalid old forward #%d = %p", i, oldforw[i]);
-  }
-  qishgc_full (2*MIN_BIRTH_SIZE, nbforw, oldforw, newforw);
-} /* end of qish_preforward_garbagecollect */
+  assert (oldforw != 0);
+  assert (newforw != 0);
+  for (i = 0; i < nbforw; i++)
+    {
+      if (newforw[i] && !QISH_IS_MOVING_PTR (newforw[i]))
+	qish_panic ("invalid new forward #%d = %p", i, newforw[i]);
+      if (oldforw[i] && !QISH_IS_MOVING_PTR (oldforw[i]))
+	qish_panic ("invalid old forward #%d = %p", i, oldforw[i]);
+    }
+  qishgc_full (2 * MIN_BIRTH_SIZE, nbforw, oldforw, newforw);
+}				/* end of qish_preforward_garbagecollect */
 
 
 void
@@ -1339,12 +1409,13 @@ qishgc_init (void)
     time_t now = 0;
     if (tracnam)
       qish_tracememfile = fopen (tracnam, "w");
-    if (qish_tracememfile) {
-      time (&now);
-      fprintf (qish_tracememfile, "#Tracing Qish memory pid %d on %s\n",
-	       (int) getpid (), ctime (&now));
-      fflush (qish_tracememfile);
-    }
+    if (qish_tracememfile)
+      {
+	time (&now);
+	fprintf (qish_tracememfile, "#Tracing Qish memory pid %d on %s\n",
+		 (int) getpid (), ctime (&now));
+	fflush (qish_tracememfile);
+      }
   }
 #endif /*TRACEMEM*/
     //
@@ -1354,8 +1425,8 @@ qishgc_init (void)
     qish_epanic (" cannot initialize fixed heap range of %d MBytes",
 		 FIXEDHEAP_MAXLEN >> 20);
   qish_dbgprintf ("mmap fixed adrzon %p-%p %dK", qishgc_fixed_lo,
-	     (char *) qishgc_fixed_lo + FIXEDHEAP_MAXLEN,
-	     FIXEDHEAP_MAXLEN >> 10);
+		  (char *) qishgc_fixed_lo + FIXEDHEAP_MAXLEN,
+		  FIXEDHEAP_MAXLEN >> 10);
   if (mmap
       (qishgc_fixed_lo, (size_t) FIXEDHEAP_INITLEN,
        PROT_READ | PROT_WRITE | PROT_EXEC, MAP_ANON | MAP_PRIVATE | MAP_FIXED,
@@ -1364,7 +1435,7 @@ qishgc_init (void)
 		 FIXEDHEAP_INITLEN >> 20);
   qishgc_fixed_hi = (void *) ((char *) qishgc_fixed_lo + FIXEDHEAP_INITLEN);
   qish_dbgprintf ("mmap fixed %p-%p %dK", qishgc_fixed_lo, qishgc_fixed_hi,
-	     FIXEDHEAP_INITLEN >> 10);
+		  FIXEDHEAP_INITLEN >> 10);
   free_fixed_chunk (0, qishgc_fixed_lo, FIXEDHEAP_INITLEN);
   oldsiz = 4 * MIN_BIRTH_SIZE;
   qishgc_old_lo = qishgc_getmem ("initial old region", oldsiz);
