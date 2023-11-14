@@ -7,7 +7,6 @@ The lib/ subdirectory contains the runtime library.
 The doc/ subdirectory contains the documentation (same as qishintro.html); 
 you need LaTeX, ps2pdf, and hevea to regenerate it.
 
-There is no more any ruko/ subdirectory in the distribution
 
 
 Look on {http://www.starynkevitch.net/Basile/qishintro.html} for the
