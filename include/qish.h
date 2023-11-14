@@ -22,7 +22,7 @@
  * Boston, MA 02111-1307, USA.
  */
 
-#define QISH_GITID "5dc75189ba36+"
+#define QISH_GITID "374f227af067+"
 #define QISH_TIMESTAMP "now"
 
 #ifdef __cplusplus
