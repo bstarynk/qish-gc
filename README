@@ -1,6 +1,6 @@
 Qish contains an opensource runtime library with a reusable
 generational copying garbage collector for C or C++.  License is GNU
-Lesser General Public License (see COPYING)
+Lesser General Public License (see COPYING-LGPLv3+)
 
 
 The lib/ subdirectory contains the runtime library.
@@ -30,7 +30,8 @@ on this. Thanks.
 
 
 
-
+The qish_nil thing might not be standard compliant. Should practically
+work on many POSIX.
 
 ################ past releases 
 
