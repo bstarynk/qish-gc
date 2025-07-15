@@ -30,8 +30,8 @@ on this. Thanks.
 
 
 
-The qish_nil thing might not be standard compliant. Should practically
-work on many POSIX.
+The `qish_nil` thing is not be standard compliant. Should practically
+work on many POSIX. Patches are welcome to avoid it.
 
 ################ past releases 
 
@@ -68,7 +68,7 @@ version of the files :-( this was the initial release
 -- 
 
 Basile STARYNKEVITCH
-8, rue de la Faïencerie, 92340 Bourg La Reine, France
+8, rue de la FaÃ¯encerie, 92340 Bourg La Reine, France
 http://www.starynkevitch.net/Basile/
 mailto:basile@starynkevitch.net
 
