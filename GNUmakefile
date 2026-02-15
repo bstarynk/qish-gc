@@ -1,6 +1,6 @@
 # file qish-gc/GNUmakefile
 # SPDX-License-Identifier: GPL-3.0-or-later
-# Copyright © 2002-2026 Basile STARYNKEVITCH
+# Copyright © 2002-2026 Basile STARYNKEVITCH, France
 SUFFIXES += .i
 RM=/bin/rm -vf
 MV=/bin/mv
@@ -12,8 +12,8 @@ INSTALL=/usr/bin/install
 MKDIR=/usr/bin/mkdir -vp
 RELEASE=1.0
 
-.PHONY: all indent prog clean lib dist install test
-all: lib prog
+.PHONY: all tools indent prog clean lib dist install test
+all: lib prog tools
 
 lib:
 	$(MAKE) -C lib lib
@@ -22,11 +22,16 @@ clean:
 	$(MAKE) -C lib clean
 	$(MAKE) -C doc clean
 #	$(MAKE) -C ruko clean
+	$(MAKE) -C tool-dir clean
 	$(RM) core *~ */*~
+
+tools:
+	$(MAKE) -C tool-dir all
 
 indent:
 	$(INDENT) include/qish.h
 	for f in $(wildcard lib/*.[ch]) ; do  $(INDENT) $$f ; done
+	for f in $(wildcard tool-dir/*.[ch]) ; do  $(INDENT) $$f ; done
 prog:
 #	$(MAKE) -C beth prog
 
