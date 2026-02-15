@@ -26,7 +26,7 @@
 #include <setjmp.h>
 #include <string.h>
 #include <unistd.h>
-
+#include <assert.h>
 
 
 void first (int a);
@@ -121,8 +121,10 @@ main (int argc, char **argv)
 void
 first (int a)
 {
+  int origa = a;
   putchar ('\n');
   second (&a, a + 2, a + 3);
+  assert (origa > 0);
 }
 
 void
