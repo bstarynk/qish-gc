@@ -3,7 +3,7 @@
 /* file qish-gc/include/qish.h */
 #define __QISH__INCLUDED__
 
-//  Copyright © 2002-2023 Basile STARYNKEVITCH
+//  Copyright © 2002-2026 Basile STARYNKEVITCH
 
 /*
  * This library is free software; you can redistribute it and/or
@@ -53,6 +53,9 @@ extern "C"
   extern const char qishlib_date[];
   extern const long qishlib_time;	/*actually a time_t */
   extern const char qishlib_srcdir[];
+  /// compilation command prefixes
+  extern const char qishlib_compile_c[];
+  extern const char qishlib_compile_cpp[];
   extern const char qishlib_hostname[];
   extern const char qishlib_system[];
   extern const char qishlib_version[];
@@ -578,13 +581,13 @@ while ((qish_uaddr_t)(Ptr)>(qish_uaddr_t)QISH_MIN_ADDR	\
 /// [event or computing] loop near the main
   void qish_postponed_dlclose (void);
 
-  typedef void (qish_voidfun_t) ();
-  typedef void *(qish_ptrfun_t) ();
+  typedef void (qish_voidfun_t) (void);
+  typedef void *(qish_ptrfun_t) (void);
   typedef void (qish_voidfunint_t) (int);
   typedef void (qish_voidfunptr_t) (void*);
-  typedef int (qish_intfun_t) ();
-  typedef long (qish_longfun_t) ();
-  typedef double (qish_doublefun_t) ();
+  typedef int (qish_intfun_t) (void);
+  typedef long (qish_longfun_t) (void);
+  typedef double (qish_doublefun_t) (void);
 
 
 // initialize the GC! mandatory to call it once before any GC or allocation
@@ -959,5 +962,10 @@ public:
 };				/* end of template QishCpp_Box */
 
 #endif /* c++ */
-
+/******
+ **         for Emacs...
+ ** Local Variables: ;;
+ ** compile-command: "cd .. && make -j2" ;;
+ ** End: ;;
+ ******/
 #endif /*__QISH__INCLUDED__ */

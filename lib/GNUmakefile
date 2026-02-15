@@ -63,6 +63,8 @@ _libdate.c:
 	date "+const char qishlib_date[]=\"%Y %b %d, %T %Z\";%nconst long qishlib_time=%s;" >_libdate.c
 	echo "const char qishlib_user[]=\"$(shell /usr/bin/whoami)\";" >> _libdate.c
 	echo "const char qishlib_srcdir[]=\"$(PWD)\";" >> _libdate.c
+	echo "const char qishlib_compile_c[]=\"$(COMPILE.c)\";" >> _libdate.c
+	echo "const char qishlib_compile_cpp[]=\"$(COMPILE.cpp)\";" >> _libdate.c
 	echo "const char qishlib_hostname[]=\"$(shell /usr/bin/hostname -f)\";" >> _libdate.c
 	echo "const char qishlib_system[]=\"$(shell /usr/bin/uname -srm)\";" >> _libdate.c
 	echo 'const char qishlib_id[]="$(IDENTSTRING)";' >> _libdate.c 
