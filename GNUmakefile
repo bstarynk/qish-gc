@@ -1,11 +1,12 @@
 # file qish-gc/GNUmakefile
 # SPDX-License-Identifier: GPL-3.0-or-later
-# Copyright © 2002-2023 Basile STARYNKEVITCH
+# Copyright © 2002-2026 Basile STARYNKEVITCH
 SUFFIXES += .i
 RM=/bin/rm -vf
 MV=/bin/mv
 CP=/bin/cp -v
 ED=/usr/bin/ed
+CC?=/usr/bin/gcc
 INDENT=/usr/bin/indent
 INSTALL=/usr/bin/install
 MKDIR=/usr/bin/mkdir -vp

@@ -1017,7 +1017,7 @@ qish_fixed_forget (void *ob)
   hd = (struct qishfixedheader_st *) ob - 1;
   sz = qishgc_fixed_sizetab[hd->kfx_sizix];
   memset (ob, 0, sz);
-  hd->kfx_destr = (qish_voidfun_t *) - 1;
+  hd->kfx_destr = (qish_voidfunptr_t *) (-1);
 }				/* end of qish_fixed_forget */
 
 void

@@ -51,3 +51,6 @@ Module.symvers
 Mkfile.old
 dkms.conf
 include/_qishgen.h
+lib/*~
+lib/_qi*
+lib/genqish

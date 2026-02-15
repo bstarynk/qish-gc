@@ -580,6 +580,8 @@ while ((qish_uaddr_t)(Ptr)>(qish_uaddr_t)QISH_MIN_ADDR	\
 
   typedef void (qish_voidfun_t) ();
   typedef void *(qish_ptrfun_t) ();
+  typedef void (qish_voidfunint_t) (int);
+  typedef void (qish_voidfunptr_t) (void*);
   typedef int (qish_intfun_t) ();
   typedef long (qish_longfun_t) ();
   typedef double (qish_doublefun_t) ();

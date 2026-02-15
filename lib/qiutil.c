@@ -484,7 +484,7 @@ found:
   snprintf (modpath, sizeof (modpath) - 1, "qishinit_%s", modname);
   init = dlsym (dlh, modpath);
   if (init)
-    (*(qish_voidfun_t *) init) (modrank);
+    (*(qish_voidfunint_t *) init) (modrank);
   qish_moduletab[modrank].km_handle = dlh;
   return modrank;
 }				// end of qish_load_module
@@ -561,7 +561,7 @@ qish_unload_module (int modrank)
 	    qish_moduletab[modrank].km_name);
   fini = dlsym (qish_moduletab[modrank].km_handle, nampath);
   if (fini)
-    (*(qish_voidfun_t *) fini) (modrank);
+    (*(qish_voidfunint_t *) fini) (modrank);
   memset (qish_moduletab + modrank, 0, sizeof (struct qishmodule_st));
 }				/* end of qish_unload_module */
 

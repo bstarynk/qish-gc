@@ -1,6 +1,6 @@
 # file qish-gc/lib/GNUmakefile
 # SPDX-License-Identifier: GPL-3.0-or-later
-# Copyright © 2002-2023 Basile STARYNKEVITCH
+# Copyright © 2002-2026 Basile STARYNKEVITCH
 
 #* This library is free software; you can redistribute it and/or
 #* modify it under the terms of the GNU Lesser General Public
@@ -29,7 +29,8 @@ endif
 ifndef PREFIX
 PREFIX=/usr/local
 endif
-CFLAGS+= -Wall -W -Wmissing-prototypes -Wmissing-declarations -Wredundant-decls -Winline  $(OPTIMFLAGS)
+CC= gcc
+CFLAGS+= -Wall -Wextra -W -Wmissing-prototypes -Wmissing-declarations -Wredundant-decls -Winline  $(OPTIMFLAGS)
 CPPFLAGS+= -I../include/ -I./
 CXXFLAGS+= $(OPTIMFLAGS) $(CPPFLAGS) -Wall
 
