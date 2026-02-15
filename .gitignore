@@ -54,3 +54,5 @@ include/_qishgen.h
 lib/*~
 lib/_qi*
 lib/genqish
+GCbench
+bench_*
