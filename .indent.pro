@@ -1,0 +1,21 @@
+/* file qish-gc/.indent.pro */
+--no-tabs
+--line-length85
+-T FILE
+-T pthread_mutex_t
+-T Obj_HDGJIRPS
+-T int32_t
+-T uint32_t
+-T int64_t
+-T uint64_t
+-T inptr_t
+-T uintptr_t
+-T qish_voidfun_t
+-T qish_ptrfun_t
+-T qish_voidfunint_t
+-T qish_voidfunptr_t
+-T qish_longfun_t
+-T qish_doublefun_t
+-T qish_uaddr_t
+-T qish_uword_t
+-T qish_word_t
