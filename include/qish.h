@@ -3,7 +3,7 @@
 /* file qish-gc/include/qish.h */
 #define __QISH__INCLUDED__
 
-//  Copyright © 2002-2026 Basile STARYNKEVITCH
+// (C) Copyright © 2002-2026 Basile STARYNKEVITCH
 
 /*
  * This library is free software; you can redistribute it and/or
@@ -13,7 +13,7 @@
  *
  * This library is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.	 See the GNU
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  * Lesser General Public License for more details.
  *
  * You should have received a copy of the GNU Lesser General
@@ -33,7 +33,8 @@ extern "C"
 
 #include <assert.h>
 #include <stdlib.h>
-#include <stdlib.h>
+#include <stdio.h>
+#include <stdbool.h>
 
 /* include a generated include file defining important system
    dependent constants like QISH_PAGESIZE etc...*/
@@ -91,10 +92,10 @@ extern "C"
 
   extern int qish_debug;
 #ifndef NDEBUG
-#define qish_dbgprintf(Fmt, ...) do { if (qish_debug) {	\
-  fprintf(stderr,"%s:%d!! " Fmt "\n",			\
-	  __FILE__, __LINE__,				\
-	  ##__VA_ARGS__);				\
+#define qish_dbgprintf(Fmt, ...) do { if (qish_debug) { \
+  fprintf(stderr,"%s:%d!! " Fmt "\n",                   \
+          __FILE__, __LINE__,                           \
+          ##__VA_ARGS__);                               \
   fflush(stderr);}} while(0)
 #else
 #define qish_dbgprintf(Fmt, Args...) do {} while(0)
@@ -264,7 +265,7 @@ extern "C"
   /// call the garbage collector; first argument is new required
   /// birthsize, eg wanted size; second argument is a boolean flag to
   /// force full garbage collection
-  void qish_garbagecollect (int size, int needfull);
+  void qish_garbagecollect (int size, bool needfull);
 
   /// preforward some application pointers from a set of old pointers
   /// to be forwarded into a set of new pointers; costly, since
@@ -272,12 +273,12 @@ extern "C"
   void qish_preforward_garbagecollect (int nbforw, void *oldforw[], void *newforw[]);
 
 // test if a pointer is moving (outside of GC routines!)
-#define QISH_IS_MOVING_PTR(P) ((((qish_uaddr_t)P)&3)==0 &&		\
-  ( ((void*)(P)>=qishgc_birth.bt_lo && (void*)(P)<=qishgc_birth.bt_hi)	\
+#define QISH_IS_MOVING_PTR(P) ((((qish_uaddr_t)P)&3)==0 &&              \
+  ( ((void*)(P)>=qishgc_birth.bt_lo && (void*)(P)<=qishgc_birth.bt_hi)  \
     || ((void*)(P)>=qishgc_old_lo && (void*)(P)<=qishgc_old_hi) ))
 
   // test if a pointer is fixed (outside of GC routines!)
-#define QISH_IS_FIXED_PTR(P)  ((((qish_uaddr_t)P)&3)==0 &&		\
+#define QISH_IS_FIXED_PTR(P)  ((((qish_uaddr_t)P)&3)==0 &&              \
   ( ((void*)(P)>=qishgc_fixed_lo && (void*)(P)<=qishgc_fixed_hi)))
 
 #ifndef NO_QISH_INLINE
@@ -295,19 +296,20 @@ extern "C"
   }                             // end of qish_write_notify
 #endif                          /*NO_QISH_INLINE */
 
-#define QISH_WRITE_NOTIFY(Ob) do {					\
-    void* _qiwr= (void*)(Ob);						\
-      if ( _qiwr == qishgc_birth.bt_storeptr[1]				\
-          || _qiwr == qishgc_birth.bt_storeptr[2]			\
-          || _qiwr == qishgc_birth.bt_storeptr[3]) { }			\
-  else if (((qish_uaddr_t) _qiwr >= (qish_uaddr_t) qishgc_old_lo	\
-      && (qish_uaddr_t) _qiwr < (qish_uaddr_t) qishgc_old_hi)		\
-|| QISH_IS_FIXED_PTR(_qiwr))  {						\
-  *(qishgc_birth.bt_storeptr--) = _qiwr;				\
-  if (QISH_UNLIKELY((void**) qishgc_birth.bt_storeptr - 4		\
-      <= (void **) qishgc_birth.bt_cur))				\
-    qish_garbagecollect (QISH_PAGESIZE, 0);				\
-  }									\
+#define QISH_WRITE_NOTIFY(Ob) do {				\
+    void* _qiwr= (void*)(Ob);					\
+      if ( _qiwr == qishgc_birth.bt_storeptr[1]			\
+          || _qiwr == qishgc_birth.bt_storeptr[2]		\
+          || _qiwr == qishgc_birth.bt_storeptr[3]) { }		\
+      else if (((qish_uaddr_t) _qiwr				\
+		>= (qish_uaddr_t) qishgc_old_lo			\
+      && (qish_uaddr_t) _qiwr < (qish_uaddr_t) qishgc_old_hi)	\
+           || QISH_IS_FIXED_PTR(_qiwr))  {			\
+  *(qishgc_birth.bt_storeptr--) = _qiwr;			\
+  if (QISH_UNLIKELY((void**) qishgc_birth.bt_storeptr - 4	\
+      <= (void **) qishgc_birth.bt_cur))			\
+    qish_garbagecollect (QISH_PAGESIZE, 0);			\
+  }								\
 } while(0)
 
 #ifndef NO_QISH_INLINE
@@ -360,108 +362,108 @@ extern "C"
 /* the first word of an object should be non-zero (except for fowarded
    pointers) */
 
-#define QISHGC_FORWARD(Pptr) do {			\
-  void **_qipptr = *(void ***) (Pptr);			\
-  if (_qipptr != (void**)&qish_nil) {			\
-  if (*_qipptr == 0) {					\
-    /* already forwarded */				\
-    *(Pptr) = _qipptr[1];				\
-  } else {						\
-    void *_qiad = 0;					\
-    void *_qiend =  (void*)qishgc_old_cur;		\
-    _qiend = qish_gc_copy (&_qiad, _qiend,		\
-			   (const void *) _qipptr);	\
-    _qipptr[0] = 0;					\
-    _qipptr[1] = _qiad;					\
-    *(Pptr) = _qiad;					\
-    qishgc_old_cur = _qiend;				\
-  }							\
- }							\
+#define QISHGC_FORWARD(Pptr) do {                       \
+  void **_qipptr = *(void ***) (Pptr);                  \
+  if (_qipptr != (void**)&qish_nil) {                   \
+  if (*_qipptr == 0) {                                  \
+    /* already forwarded */                             \
+    *(Pptr) = _qipptr[1];                               \
+  } else {                                              \
+    void *_qiad = 0;                                    \
+    void *_qiend =  (void*)qishgc_old_cur;              \
+    _qiend = qish_gc_copy (&_qiad, _qiend,              \
+                           (const void *) _qipptr);     \
+    _qipptr[0] = 0;                                     \
+    _qipptr[1] = _qiad;                                 \
+    *(Pptr) = _qiad;                                    \
+    qishgc_old_cur = _qiend;                            \
+  }                                                     \
+ }                                                      \
 }  while(0)
 
 
-#define QISHGC_MINOR_UPDATE(Ptr) do {		\
-  if (((qish_uaddr_t)(Ptr) & 3) == 0		\
-      && Ptr != &qish_nil)			\
-       QISHGC_MINOR_PTR_UPDATE(Ptr);		\
+#define QISHGC_MINOR_UPDATE(Ptr) do {           \
+  if (((qish_uaddr_t)(Ptr) & 3) == 0            \
+      && Ptr != &qish_nil)                      \
+       QISHGC_MINOR_PTR_UPDATE(Ptr);            \
 } while(0)
 
-#define QISH_FOLLOW_FORWARD(Ptr) do {		\
-  if (((qish_uaddr_t)(Ptr) & 3) == 0		\
-      && Ptr != &qish_nil)			\
-       QISH_FOLLOW_FORWARD_PTR(Ptr);		\
+#define QISH_FOLLOW_FORWARD(Ptr) do {           \
+  if (((qish_uaddr_t)(Ptr) & 3) == 0            \
+      && Ptr != &qish_nil)                      \
+       QISH_FOLLOW_FORWARD_PTR(Ptr);            \
 } while(0)
 
-#define QISH_FOLLOW_FORWARD_PTR(Ptr) 	do	{	\
-while ((qish_uaddr_t)(Ptr)>(qish_uaddr_t)QISH_MIN_ADDR	\
-       && *((qish_uaddr_t*)(Ptr)) == 0)			\
+#define QISH_FOLLOW_FORWARD_PTR(Ptr)    do      {       \
+while ((qish_uaddr_t)(Ptr)>(qish_uaddr_t)QISH_MIN_ADDR  \
+       && *((qish_uaddr_t*)(Ptr)) == 0)                 \
   (Ptr) = (void*)(((qish_uaddr_t*)(Ptr))[1]);} while(0)
 
 
 
 // same as QISHGC_MINOR_UPDATE but the pointer is known to not be a tagged int
-#define QISHGC_MINOR_PTR_UPDATE(Ptr) do {	\
-  qish_uaddr_t _qip;				\
+#define QISHGC_MINOR_PTR_UPDATE(Ptr) do {       \
+  qish_uaddr_t _qip;                            \
   /* qishgc minor ptr update */                 \
-  QISH_FOLLOW_FORWARD_PTR(Ptr);			\
-  _qip = (qish_uaddr_t)(Ptr);			\
+  QISH_FOLLOW_FORWARD_PTR(Ptr);                 \
+  _qip = (qish_uaddr_t)(Ptr);                   \
   if (_qip != (qish_uaddr_t) &qish_nil           \
-      &&_qip>=(qish_uaddr_t)qishgc_birth.bt_lo	\
-      && _qip<(qish_uaddr_t)qishgc_birth.bt_hi)	\
-    {QISHGC_FORWARD((void**)&(Ptr)); } 		\
- else if (QISH_IS_FIXED_PTR(_qip)) 		\
+      &&_qip>=(qish_uaddr_t)qishgc_birth.bt_lo  \
+      && _qip<(qish_uaddr_t)qishgc_birth.bt_hi) \
+    {QISHGC_FORWARD((void**)&(Ptr)); }          \
+ else if (QISH_IS_FIXED_PTR(_qip))              \
     qishgc_minormark((void*)_qip);} while(0)
 
 
 
-#define QISHGC_FULL_UPDATE(Ptr) do { if (((qish_uaddr_t)(Ptr)&3) == 0) 	\
+#define QISHGC_FULL_UPDATE(Ptr) do { if (((qish_uaddr_t)(Ptr)&3) == 0)  \
  QISHGC_FULL_PTR_UPDATE(Ptr); } while(0)
 
 // same as QISHGC_FULL_UPDATE but the pointer is known to not be a tagged int
-#define QISHGC_FULL_PTR_UPDATE(Ptr) do {				\
-  qish_uaddr_t _qip;							\
-  QISH_FOLLOW_FORWARD_PTR(Ptr);						\
-  _qip = (qish_uaddr_t)(Ptr);						\
-  if ((_qip>=(qish_uaddr_t)qishgc_birth.bt_lo				\
-       && _qip<(qish_uaddr_t)qishgc_birth.bt_hi)			\
-      || (_qip>=(qish_uaddr_t)qishgc_old_lo				\
-          && _qip<(qish_uaddr_t)qishgc_old_hi))				\
-    {QISHGC_FORWARD((void**)&(Ptr));}					\
-  else if (_qip>=(qish_uaddr_t)qishgc_fixed_lo				\
-       && _qip<=(qish_uaddr_t)qishgc_fixed_hi) {			\
-       if (((qish_word_t)((struct qishfixedheader_st*)			\
-			  (_qip))[-1].kfx_destr)==(qish_word_t)-1) 	\
-	 *(void**)&(Ptr) = 0;						\
-        else if (!((struct qishfixedheader_st*)				\
-	    (_qip))[-1].kfx_mark)					\
+#define QISHGC_FULL_PTR_UPDATE(Ptr) do {                                \
+  qish_uaddr_t _qip;                                                    \
+  QISH_FOLLOW_FORWARD_PTR(Ptr);                                         \
+  _qip = (qish_uaddr_t)(Ptr);                                           \
+  if ((_qip>=(qish_uaddr_t)qishgc_birth.bt_lo                           \
+       && _qip<(qish_uaddr_t)qishgc_birth.bt_hi)                        \
+      || (_qip>=(qish_uaddr_t)qishgc_old_lo                             \
+          && _qip<(qish_uaddr_t)qishgc_old_hi))                         \
+    {QISHGC_FORWARD((void**)&(Ptr));}                                   \
+  else if (_qip>=(qish_uaddr_t)qishgc_fixed_lo                          \
+       && _qip<=(qish_uaddr_t)qishgc_fixed_hi) {                        \
+       if (((qish_word_t)((struct qishfixedheader_st*)                  \
+                          (_qip))[-1].kfx_destr)==(qish_word_t)-1)      \
+         *(void**)&(Ptr) = 0;                                           \
+        else if (!((struct qishfixedheader_st*)                         \
+            (_qip))[-1].kfx_mark)                                       \
     qishgc_fullmark((void*)(_qip)); }} while(0)
 
 #define QIGC__SET_CUR_FRAME(F) qishgc_birth.bt_qishgcf = &(F)
 
-#define QISH_ENTER_FRAME(Point, Params, Locals)	\
-  struct qishgc_framedescr_st __qcf_cur;	\
-  __qcf_cur.gcf_point = &Point;			\
-  __qcf_cur.gcf_args = (void**)&Params;		\
-  __qcf_cur.gcf_locals = (void**)&Locals;	\
-  __qcf_cur.gcf_prev = qishgc_birth.bt_qishgcf;	\
+#define QISH_ENTER_FRAME(Point, Params, Locals) \
+  struct qishgc_framedescr_st __qcf_cur;        \
+  __qcf_cur.gcf_point = &Point;                 \
+  __qcf_cur.gcf_args = (void**)&Params;         \
+  __qcf_cur.gcf_locals = (void**)&Locals;       \
+  __qcf_cur.gcf_prev = qishgc_birth.bt_qishgcf; \
   QIGC__SET_CUR_FRAME(__qcf_cur);
 
 #define ENTER_FRAME QISH_ENTER_FRAME    /*compatibility */
 
-#define QISH_ENTER_FRAME_WITHOUT_ARGS(Point,Locals)	\
-  struct qishgc_framedescr_st __qcf_cur;	\
-  __qcf_cur.gcf_point = &Point;			\
-  __qcf_cur.gcf_args = 0;			\
-  __qcf_cur.gcf_locals = (void**)&Locals;	\
-  __qcf_cur.gcf_prev = qishgc_birth.bt_qishgcf;	\
-  QIGC__SET_CUR_FRAME(__qcf_cur);
-
-#define QISH_ENTER_FRAME_WITHOUT_LOCALS(Point, Params)	\
+#define QISH_ENTER_FRAME_WITHOUT_ARGS(Point,Locals)     \
   struct qishgc_framedescr_st __qcf_cur;		\
   __qcf_cur.gcf_point = &Point;				\
-  __qcf_cur.gcf_args = (void**)&Params;			\
-  __qcf_cur.gcf_locals = 0;				\
-  __qcf_cur.gcf_prev = qishgc_birth.bt_qishgcf;	       	\
+  __qcf_cur.gcf_args = 0;				\
+  __qcf_cur.gcf_locals = (void**)&Locals;		\
+  __qcf_cur.gcf_prev = qishgc_birth.bt_qishgcf;		\
+  QIGC__SET_CUR_FRAME(__qcf_cur);
+
+#define QISH_ENTER_FRAME_WITHOUT_LOCALS(Point, Params)  \
+  struct qishgc_framedescr_st __qcf_cur;                \
+  __qcf_cur.gcf_point = &Point;                         \
+  __qcf_cur.gcf_args = (void**)&Params;                 \
+  __qcf_cur.gcf_locals = 0;                             \
+  __qcf_cur.gcf_prev = qishgc_birth.bt_qishgcf;         \
   QIGC__SET_CUR_FRAME(__qcf_cur);
 
 #define ENTER_FRAME_WITHOUT_LOCALS QISH_ENTER_FRAME_WITHOUT_LOCALS
@@ -470,16 +472,16 @@ while ((qish_uaddr_t)(Ptr)>(qish_uaddr_t)QISH_MIN_ADDR	\
   qishgc_birth.bt_qishgcf = __qcf_cur.gcf_prev
 #define EXIT_FRAME QISH_EXIT_FRAME
 
-#define QISH_DESCR_FRAME(Point, Nbparam, Nblocal, Rank)	\
-   static struct qishgc_safepointdescr_st const Point	\
+#define QISH_DESCR_FRAME(Point, Nbparam, Nblocal, Rank) \
+   static struct qishgc_safepointdescr_st const Point   \
    = { Nbparam, Nblocal, Rank, (void*)0, __FUNCTION__ }
 #define DESCR_FRAME QISH_DESCR_FRAME
 
-#define QISH_DESCR_SIMPLE_FRAME(Nbparam, Nblocal)		\
+#define QISH_DESCR_SIMPLE_FRAME(Nbparam, Nblocal)       \
    QISH_DESCR_FRAME(__gcd_curpt, Nbparam, Nblocal, 0)
 #define DESCR_SIMPLE_FRAME QISH_DESCR_SIMPLE_FRAME
 
-#define QISH_ENTER_SIMPLE_FRAME(Params, Locals)	\
+#define QISH_ENTER_SIMPLE_FRAME(Params, Locals) \
    QISH_ENTER_FRAME(__gcd_curpt, Params, Locals)
 #define ENTER_SIMPLE_FRAME QISH_ENTER_SIMPLE_FRAME
 
@@ -496,8 +498,8 @@ while ((qish_uaddr_t)(Ptr)>(qish_uaddr_t)QISH_MIN_ADDR	\
    QISH_ENTER_FRAME_WITHOUT_LOCALS(__gcd_curpt, Param1)
 #define BEGIN_FRAME_WITHOUT_LOCALS   QISH_BEGIN_FRAME_WITHOUT_LOCALS
 
-#define QISH_BEGIN_LOCAL_FRAME_WITHOUT_ARGS()			\
-   QISH_DESCR_SIMPLE_FRAME(0, sizeof(_locals_)/sizeof(void*));	\
+#define QISH_BEGIN_LOCAL_FRAME_WITHOUT_ARGS()                   \
+   QISH_DESCR_SIMPLE_FRAME(0, sizeof(_locals_)/sizeof(void*));  \
    QISH_ENTER_FRAME_WITHOUT_ARGS(__gcd_curpt, _locals_)
 #define BEGIN_LOCAL_FRAME_WITHOUT_ARGS  QISH_BEGIN_LOCAL_FRAME_WITHOUT_ARGS
 
@@ -515,32 +517,32 @@ while ((qish_uaddr_t)(Ptr)>(qish_uaddr_t)QISH_MIN_ADDR	\
     char setjmpbuffer[QISH_SETJMP_SIZE];
   };
 
-#define BEGIN_EXCEPT_BLOCK(Var) {				\
-  struct qish_excframe_st _qhcf_excfram = { 0 };		\
-  _qhcf_excfram.savedfram = qishgc_birth.bt_qishgcf;   		\
-  _qhcf_excfram.codexc = 0;					\
-  _qhcf_excfram.prevptr = Var;					\
-  Var = (void*)&_qhcf_excfram;					\
-  if (!(_qhcf_excfram.codexc 					\
-	= setjmp(*(jmp_buf*)_qhcf_excfram.setjmpbuffer))) {
+#define BEGIN_EXCEPT_BLOCK(Var) {                               \
+  struct qish_excframe_st _qhcf_excfram = { 0 };                \
+  _qhcf_excfram.savedfram = qishgc_birth.bt_qishgcf;            \
+  _qhcf_excfram.codexc = 0;                                     \
+  _qhcf_excfram.prevptr = Var;                                  \
+  Var = (void*)&_qhcf_excfram;                                  \
+  if (!(_qhcf_excfram.codexc                                    \
+        = setjmp(*(jmp_buf*)_qhcf_excfram.setjmpbuffer))) {
 
-#define CATCH_EXCEPT_BLOCK(Cod,Exc)		\
-  } else {					\
-    Cod = _qhcf_excfram.codexc;			\
-    Exc = _qhcf_excfram.obj;			\
+#define CATCH_EXCEPT_BLOCK(Cod,Exc)             \
+  } else {                                      \
+    Cod = _qhcf_excfram.codexc;                 \
+    Exc = _qhcf_excfram.obj;                    \
     qishgc_birth.bt_qishgcf = _qhcf_excfram.savedfram;
 
-#define END_EXCEPT_BLOCK(Var)					\
-   Var = _qhcf_excfram.prevptr;		       			\
-   memset(&_qhcf_excfram, 0, sizeof(struct qish_excframe_st));	\
+#define END_EXCEPT_BLOCK(Var)                                   \
+   Var = _qhcf_excfram.prevptr;                                 \
+   memset(&_qhcf_excfram, 0, sizeof(struct qish_excframe_st));  \
 } }
 
-#define THROW_EXCEPTION(Var,Cod,Exobj) do {				\
-  if (!(Var)) 								\
-     qish_panic("nowhere to throw exception code %d", (Cod));		\
-  ((struct qish_excframe_st*)(Var))->obj = (Exobj);			\
-  longjmp(*(jmp_buf*)((struct qish_excframe_st*)(Var))->setjmpbuffer, 	\
-	  (Cod));							\
+#define THROW_EXCEPTION(Var,Cod,Exobj) do {                             \
+  if (!(Var))                                                           \
+     qish_panic("nowhere to throw exception code %d", (Cod));           \
+  ((struct qish_excframe_st*)(Var))->obj = (Exobj);                     \
+  longjmp(*(jmp_buf*)((struct qish_excframe_st*)(Var))->setjmpbuffer,   \
+          (Cod));                                                       \
 } while (0)
 
 
@@ -555,7 +557,7 @@ while ((qish_uaddr_t)(Ptr)>(qish_uaddr_t)QISH_MIN_ADDR	\
 #define QISH_NB_ROOTS 64
   extern volatile void *qish_roots[QISH_NB_ROOTS];
 
-#define QISH_MAX_MODULE 8192
+#define QISH_MAX_MODULE 16384
   extern struct qishmodule_st
   {
     char km_name[100];          // module basename
@@ -598,9 +600,9 @@ while ((qish_uaddr_t)(Ptr)>(qish_uaddr_t)QISH_MIN_ADDR	\
   extern volatile void *qish_globconstab[QISH_MAXNBCONST + 1];
   extern volatile char qish_globconstabwrbar[(QISH_MAXNBCONST >> 8) + 1];
 #define QISH_GLOBCONST(N) qish_globconstab[(N)&(QISH_MAXNBCONST-1)]
-#define QISH_SET_GLOBCONST(N,V) do{				\
-  qish_globconstabwrbar[((N) & (QISH_MAXNBCONST-1))>>8]=1;	\
-  qish_globconstab[(N) & (QISH_MAXNBCONST-1)] = (V);		\
+#define QISH_SET_GLOBCONST(N,V) do{                             \
+  qish_globconstabwrbar[((N) & (QISH_MAXNBCONST-1))>>8]=1;      \
+  qish_globconstab[(N) & (QISH_MAXNBCONST-1)] = (V);            \
 } while(0)
 
 #ifndef NO_QISH_INLINE
@@ -642,24 +644,24 @@ while ((qish_uaddr_t)(Ptr)>(qish_uaddr_t)QISH_MIN_ADDR	\
 #endif /* NO_QISH_INLINE */
 
   // even constant changed to new objects need notification!    
-#define QISH_CHANGE_MODULE_CONSTANT(Rk,Val) {		       	\
-  assert ((Rk) >= 0 && (Rk) < QISH_MAX_MODULE);			\
-  qish_moduletab[(Rk)].km_constant = (Val);			\
-  if ((Rk) >= qishgc_changedconstrank)				\
-    qishgc_changedconstrank = (Rk) + 1;				\
+#define QISH_CHANGE_MODULE_CONSTANT(Rk,Val) {                   \
+  assert ((Rk) >= 0 && (Rk) < QISH_MAX_MODULE);                 \
+  qish_moduletab[(Rk)].km_constant = (Val);                     \
+  if ((Rk) >= qishgc_changedconstrank)                          \
+    qishgc_changedconstrank = (Rk) + 1;                         \
 }
 
 #define QISH_MODULE_CONSTANT(Rk) qish_moduletab[Rk].km_constant
 
-#define QISH_ALLOCATE(Ptr,Siz) do {				\
-  int _qialsz = (Siz);						\
-  Ptr = 0;							\
-  if (QISH_UNLIKELY(qish_need_gc		       		\
-      || ((char *) qishgc_birth.bt_cur) + _qialsz		\
-         >= (char *) (qishgc_birth.bt_storeptr - 2)))		\
-    qish_garbagecollect (_qialsz+16*sizeof(void*), 0);		\
-  Ptr = (void*) qishgc_birth.bt_cur;				\
-  qishgc_birth.bt_cur = (char*)qishgc_birth.bt_cur + _qialsz;	\
+#define QISH_ALLOCATE(Ptr,Siz) do {                             \
+  int _qialsz = (Siz);                                          \
+  Ptr = 0;                                                      \
+  if (QISH_UNLIKELY(qish_need_gc                                \
+      || ((char *) qishgc_birth.bt_cur) + _qialsz               \
+         >= (char *) (qishgc_birth.bt_storeptr - 2)))           \
+    qish_garbagecollect (_qialsz+16*sizeof(void*), 0);          \
+  Ptr = (void*) qishgc_birth.bt_cur;                            \
+  qishgc_birth.bt_cur = (char*)qishgc_birth.bt_cur + _qialsz;   \
 } while(0)
 
 
@@ -700,22 +702,22 @@ while ((qish_uaddr_t)(Ptr)>(qish_uaddr_t)QISH_MIN_ADDR	\
     return res;
   }
 
-#define QISH_ALLOCATE_TYPED(Ptr,Type) do {				\
-  if (__alignof__(Type) <= sizeof(void*)) {				\
-    QISH_ALLOCATE((Ptr),sizeof(Type));					\
-  } else {								\
-    (Ptr) = qish_allocate_aligned(sizeof(Type),__alignof__(Type));	\
-  }									\
+#define QISH_ALLOCATE_TYPED(Ptr,Type) do {                              \
+  if (__alignof__(Type) <= sizeof(void*)) {                             \
+    QISH_ALLOCATE((Ptr),sizeof(Type));                                  \
+  } else {                                                              \
+    (Ptr) = qish_allocate_aligned(sizeof(Type),__alignof__(Type));      \
+  }                                                                     \
 } while(0)
 
-#define QISH_ALLOCATE_TYPED_GAP(Ptr,Type,Gap) do {	\
-  int _qisz = sizeof(Type) + (Gap);			\
-  if (__alignof__(Type) <= sizeof(void*)) {		\
-    QISH_ALLOCATE((Ptr),_qisz);				\
-  } else {						\
-    (Ptr) = qish_allocate_aligned(_qisz,		\
-				  __alignof__(Type));	\
-  }							\
+#define QISH_ALLOCATE_TYPED_GAP(Ptr,Type,Gap) do {      \
+  int _qisz = sizeof(Type) + (Gap);                     \
+  if (__alignof__(Type) <= sizeof(void*)) {             \
+    QISH_ALLOCATE((Ptr),_qisz);                         \
+  } else {                                              \
+    (Ptr) = qish_allocate_aligned(_qisz,                \
+                                  __alignof__(Type));   \
+  }                                                     \
 } while(0)
 
 // allocate a fixed object with a destructor

@@ -1299,7 +1299,7 @@ qishgc_full (int siz, int nbforw, void **oldforw, void **newforw)
 /* the public interface to the garbage collector has to decide between
 minor and full (major) GC */
 void
-qish_garbagecollect (int size, int needfull)
+qish_garbagecollect (int size, bool needfull)
 {
   static int gc_count;
   gc_count++;
