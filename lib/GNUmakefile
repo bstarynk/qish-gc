@@ -106,24 +106,27 @@ install: lib header
 	$(INSTALL) ../include/qish.h $(PREFIX)/include/
 	$(INSTALL) _qishgen.h $(PREFIX)/include/
 
-bench_gc: GCBench.c
+bench_gc: GCBench.c |GNUmakefile 
 	$(CC) $(OPTIMFLAGS)  -DGC $(BOEHMGC_INCLUDES) GCBench.c $(BOEHMGC_LIBS)  -lgc -o bench_gc
-bench_malloc: GCBench.c
+
+bench_malloc: GCBench.c |GNUmakefile
 	$(CC) $(OPTIMFLAGS)  GCBench.c -o bench_malloc
-bench_qish: GCBench.c libqish.a
+
+bench_qish: GCBench.c libqish.a |GNUmakefile
 	$(CC) $(OPTIMFLAGS)   -I../include -I../lib -L../lib -DQISH GCBench.c -o bench_qish -L../lib -lqish -ldl
-bench: GCBench.c bench_gc bench_malloc bench_qish
 
 
+
+bench: GCBench.c bench_gc bench_malloc bench_qish |GNUmakefile
 	@printf '\n\n** benching Qish copying GC:\n'
 	./bench_qish
-	@printf '\n\n** benching Boehm s conservative GC:\n'
+	@printf '\n\n** benching Boehm conservative GC:\n'
 	./bench_gc
 	@printf '\n\n** benching explicit malloc and free:\n'
 	./bench_malloc
 
 benchqish:GCBench.c
-	$(CC) $(OPTIMFLAGS) -O -I../include -I../lib -L../lib -DQISH GCBench.c -o bench_qish -L../lib -lqish -ldl
+	$(CC) $(OPTIMFLAGS) -O -g -I../include -I../lib -L../lib -DQISH GCBench.c -o bench_qish -L../lib -lqish -ldl
 	@printf '\n\n** benching only Qish copying GC:\n'
 	./bench_qish
 #eof qish-gc/lib/GNUmakefile

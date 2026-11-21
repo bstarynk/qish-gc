@@ -89,11 +89,11 @@ stats_rtclock (void)
   return (t.tv_sec * 1000 + t.tv_usec / 1000);
 }
 
-static const int kStretchTreeDepth = 20;        // about 64Mb
-static const int kLongLivedTreeDepth = 18;      // about 16Mb
-static const int kArraySize = 2000000;  // about 16Mb
+static const int kStretchTreeDepth = 24;        //was 20 about 256Mbytes
+static const int kLongLivedTreeDepth = 22;      //was 18 about 64Mb
+static const int kArraySize = 8000000;  //was 2000000 about 64Mb
 static const int kMinTreeDepth = 4;
-static const int kMaxTreeDepth = 20;
+static const int kMaxTreeDepth = 24; //was 20
 
 typedef struct Node0_struct
 {
@@ -347,11 +347,9 @@ TimeConstruction (int depth)
 
 
 #ifndef QISH
-int
-main ()
+int main ()
 #else
-int
-qishmain ()
+int qishmain ()
 #endif
 {
 #ifndef QISH
@@ -467,7 +465,7 @@ qishmain ()
           ((double) mytms.tms_stime + (double) mytms.tms_utime) / (double) tick);
 #ifdef GC
   printf ("Completed %ld Boehm collections\n", GC_gc_no);
-  printf ("Heap size is %d\n", GC_get_heap_size ());
+  printf ("Heap size is %ld\n", GC_get_heap_size ());
 #endif
 #ifdef QISH
   printf ("Qish done %d minor and %d full garbage collections\n"
