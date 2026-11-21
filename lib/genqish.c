@@ -51,7 +51,7 @@ main (int argc, char **argv)
   puts ("/// See github.com/bstarynk/qish-gc & starynkevitch.net/Basile");
   printf ("#define _QISHGEN_TIMESTAMP \"%s\"\n", buf);
   printf ("#define QISH_SETJMP_SIZE %d /*sizeof(jmp_buf) in bytes*/\n",
-	  (int) sizeof (jmp_buf));
+          (int) sizeof (jmp_buf));
   printf ("#define QISH_PAGESIZE %d\n", (int) sysconf (_SC_PAGE_SIZE));
   printf ("/* ARGMAX=%d */\n", (int) sysconf (_SC_ARG_MAX));
   printf ("/* STREAM_MAX=%d */\n", (int) sysconf (_SC_STREAM_MAX));
@@ -63,9 +63,9 @@ main (int argc, char **argv)
   printf ("/* CHILD_MAX=%d */\n", (int) sysconf (_SC_CHILD_MAX));
   printf ("/* CLK_TCK=%d */\n", (int) sysconf (_SC_CLK_TCK));
   printf ("/* %d phys. pages=%dMbytes */\n",
-	  (int) sysconf (_SC_PHYS_PAGES),
-	  (int) ((sysconf (_SC_PHYS_PAGES) / 1024) *
-		 (sysconf (_SC_PAGE_SIZE) / 1024)));
+          (int) sysconf (_SC_PHYS_PAGES),
+          (int) ((sysconf (_SC_PHYS_PAGES) / 1024) *
+                 (sysconf (_SC_PAGE_SIZE) / 1024)));
   memset (buf, 0, sizeof (buf));
   gethostname (buf, sizeof (buf) - 1);
   printf ("/* host: %s */\n", buf);
@@ -92,24 +92,24 @@ main (int argc, char **argv)
     {
       puts ("#error genqish cannot typedef qish_uaddr_t");
       fprintf (stderr, "no unsigned type with same size %d as pointers!\n",
-	       (int) sizeof (void *));
+               (int) sizeof (void *));
       exit (1);
     }
   puts ("typedef qish_uaddr_t qish_uword_t;\n");
   if ((int) sizeof (long) == (int) sizeof (void *))
     printf ("typedef long qish_word_t; /*%dbytes, same as void* */\n",
-	    (int) sizeof (void *));
+            (int) sizeof (void *));
   else if ((int) sizeof (int) == (int) sizeof (void *))
     printf ("typedef int qish_word_t; /*%dbytes, same as void* */\n",
-	    (int) sizeof (void *));
+            (int) sizeof (void *));
   else if ((int) sizeof (long long) == (int) sizeof (void *))
     printf ("typedef long long qish_word_t; /*%dbytes, same as void* */\n",
-	    (int) sizeof (void *));
+            (int) sizeof (void *));
   else
     {
       puts ("#error genqish cannot typedef qish_word_t");
       fprintf (stderr, "no signed type with same size %d as pointers!\n",
-	       (int) sizeof (void *));
+               (int) sizeof (void *));
       exit (1);
     }
   first (__LINE__);
@@ -132,7 +132,7 @@ second (int *pa, int b, int c)
 {
   int delta = &b - pa;
   printf ("/*pa=%p &b=%p &c=%p &delta=%p delta=%d*/\n",
-	  (void *) pa, (void *) &b, (void *) &c, (void *) &delta, delta);
+          (void *) pa, (void *) &b, (void *) &c, (void *) &delta, delta);
   if (delta > 0)
     puts ("#define QISH_STACK_UP 1 \n" "#define QISH_STACK_DOWN 0\n");
   else

@@ -60,7 +60,7 @@
 #include "qish.h"
 #define QISHVOLATILE volatile
 #else
-#define QISHVOLATILE		/*normal */
+#define QISHVOLATILE            /*normal */
 #endif
 
 #ifdef PROFIL
@@ -89,15 +89,15 @@ stats_rtclock (void)
   return (t.tv_sec * 1000 + t.tv_usec / 1000);
 }
 
-static const int kStretchTreeDepth = 20;	// about 64Mb
-static const int kLongLivedTreeDepth = 18;	// about 16Mb
-static const int kArraySize = 2000000;	// about 16Mb
+static const int kStretchTreeDepth = 20;        // about 64Mb
+static const int kLongLivedTreeDepth = 18;      // about 16Mb
+static const int kArraySize = 2000000;  // about 16Mb
 static const int kMinTreeDepth = 4;
 static const int kMaxTreeDepth = 20;
 
 typedef struct Node0_struct
 {
-  int i, j;			// Qish requires the node to start with a never zero word
+  int i, j;                     // Qish requires the node to start with a never zero word
   struct Node0_struct *left;
   struct Node0_struct *right;
 } Node0;
@@ -118,7 +118,7 @@ init_Node (Node QISHVOLATILE me, Node QISHVOLATILE l, Node QISHVOLATILE r)
   BEGIN_SIMPLE_FRAME (3, me, 0, qish_nil);
 #endif
   count++;
-  me->i = count;		/// qish requires the first word to be non zero
+  me->i = count;                /// qish requires the first word to be non zero
   me->left = l;
   me->right = r;
 #ifdef QISH
@@ -184,7 +184,7 @@ Populate (int iDepth, Node QISHVOLATILE thisNode)
 #elif defined(QISH)
       // left
       newNode = qish_allocate (sizeof (Node0));
-      newNode->i = -1;		// the first word have to be non zero for Qish
+      newNode->i = -1;          // the first word have to be non zero for Qish
       thisNode->left = newNode;
       qish_write_notify (thisNode);
 #ifdef HOLES
@@ -194,7 +194,7 @@ Populate (int iDepth, Node QISHVOLATILE thisNode)
 #endif
       // right
       newNode = qish_allocate (sizeof (Node0));
-      newNode->i = -1;		// the first word have to be non zero for Qish
+      newNode->i = -1;          // the first word have to be non zero for Qish
       thisNode->right = newNode;
       qish_write_notify (thisNode);
 #ifdef HOLES
@@ -246,7 +246,7 @@ MakeTree (int iDepth)
       /* result is implicitly initialized  */
       return result;
 #else  /*QISH*/
-	result = qish_allocate (sizeof (Node0));
+        result = qish_allocate (sizeof (Node0));
       result->i = -1;
       goto end;
 #endif
@@ -263,7 +263,7 @@ MakeTree (int iDepth)
       result = GC_NEW (Node0);
       HOLE ();
 #else  /*QISH*/
-	result = qish_allocate (sizeof (Node0));
+        result = qish_allocate (sizeof (Node0));
       result->i = -2;
 #endif
       init_Node (result, left, right);
@@ -315,7 +315,7 @@ TimeConstruction (int depth)
 #elif defined(GC)
       tempTree = GC_NEW (Node0);
 #else  /*QISH*/
-	tempTree = qish_allocate (sizeof (Node0));
+        tempTree = qish_allocate (sizeof (Node0));
       tempTree->i = -3;
 #endif
       Populate (depth, tempTree);
@@ -325,8 +325,7 @@ TimeConstruction (int depth)
       tempTree = 0;
     }
   tFinish = currentTime ();
-  printf ("\tTop down construction took %ld msec\n",
-	  elapsedTime (tFinish - tStart));
+  printf ("\tTop down construction took %ld msec\n", elapsedTime (tFinish - tStart));
 
   tStart = currentTime ();
   for (i = 0; i < iNumIters; ++i)
@@ -339,7 +338,7 @@ TimeConstruction (int depth)
     }
   tFinish = currentTime ();
   printf ("\tBottom up construction took %ld msec\n",
-	  elapsedTime (tFinish - tStart));
+          elapsedTime (tFinish - tStart));
 #ifdef QISH
   EXIT_FRAME ();
 #endif
@@ -388,20 +387,19 @@ qishmain ()
   memset (&mytms, 0, sizeof (mytms));
   printf ("\nGarbage Collector Test:"
 #ifdef QISH
-	  " QISH"
+          " QISH"
 #endif
 #ifdef GC
-	  " BoehmGC"
+          " BoehmGC"
 #endif
 #ifdef HOLES
-	  " Holes"
+          " Holes"
 #endif
-	  "\n");
+          "\n");
   printf (" Live storage will peak at %ld bytes.\n\n",
-	  2 * sizeof (Node0) * TreeSize (kLongLivedTreeDepth) +
-	  sizeof (double) * kArraySize);
-  printf (" Stretching memory with a binary tree of depth %d\n",
-	  kStretchTreeDepth);
+          2 * sizeof (Node0) * TreeSize (kLongLivedTreeDepth) +
+          sizeof (double) * kArraySize);
+  printf (" Stretching memory with a binary tree of depth %d\n", kStretchTreeDepth);
   PrintDiagnostics ();
 #ifdef PROFIL
   init_profiling ();
@@ -417,8 +415,7 @@ qishmain ()
   tempTree = 0;
 
   // Create a long lived object
-  printf (" Creating a long-lived binary tree of depth %d\n",
-	  kLongLivedTreeDepth);
+  printf (" Creating a long-lived binary tree of depth %d\n", kLongLivedTreeDepth);
 #if !defined(GC) && !defined(QISH)
   longLivedTree = calloc (1, sizeof (Node0));
 #elif defined(GC)
@@ -465,20 +462,19 @@ qishmain ()
   tick = sysconf (_SC_CLK_TCK);
   printf ("Completed in %ld msec\n", tElapsed);
   printf (" CPU %.3f user + %.3f system = %.3f total time (sec)\n",
-	  (double) mytms.tms_utime / (double) tick,
-	  (double) mytms.tms_stime / (double) tick,
-	  ((double) mytms.tms_stime +
-	   (double) mytms.tms_utime) / (double) tick);
+          (double) mytms.tms_utime / (double) tick,
+          (double) mytms.tms_stime / (double) tick,
+          ((double) mytms.tms_stime + (double) mytms.tms_utime) / (double) tick);
 #ifdef GC
   printf ("Completed %ld Boehm collections\n", GC_gc_no);
   printf ("Heap size is %d\n", GC_get_heap_size ());
 #endif
 #ifdef QISH
   printf ("Qish done %d minor and %d full garbage collections\n"
-	  "   (min.birth.size=%dK, max.size=%dK, gc.thresh=%dK)\n",
-	  qish_nb_minor_collections, qish_nb_full_collections,
-	  qish_min_birth_size >> 10, qish_max_birth_size >> 10,
-	  qish_full_gc_threshold >> 10);
+          "   (min.birth.size=%dK, max.size=%dK, gc.thresh=%dK)\n",
+          qish_nb_minor_collections, qish_nb_full_collections,
+          qish_min_birth_size >> 10, qish_max_birth_size >> 10,
+          qish_full_gc_threshold >> 10);
 #endif
 #ifdef PROFIL
   dump_profile ();
